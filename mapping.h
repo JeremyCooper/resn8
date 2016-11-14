@@ -2,24 +2,20 @@
 //
 //
 
-class Operation
+template<class T> class Member_Pointer
 {
 public:
-	void set_target(int target) { this->target = target; }
-	void set_parameters(vector<int> parameters) { this->parameters = parameters; }
-	int return_target() { return this->target; }
-	int return_parameter(unsigned int index);
+	Member_Pointer(T operation);
+	void set_pointer(T operation);
 private:
-	int target;
-	vector<int> parameters;
+	T operation;
 };
-
-int Operation::return_parameter(unsigned int index)
+template<class T> Member_Pointer<T>::Member_Pointer(T operation)
 {
-	if ((index >= 0) && (index < parameters.size()))
-	{
-		return parameters[index];
-	} else {
-		return 99;
-	}
+	this->operation = operation;
+}
+
+template<class T> void Member_Pointer<T>::set_pointer(T operation)
+{
+	this->operation = operation;
 }

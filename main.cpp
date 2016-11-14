@@ -14,20 +14,29 @@ using namespace std;
 //internal models and interfaces for attached software
 #include "models.h"
 #include "testmodel.h"
-#include "controllers.cpp"
 #include "mapping.cpp"
+#include "controllers.h"
 #include "router.cpp"
+//user controllers
+#include "apc80.h"
 
 int main()
 {
 	Test model {};
-	APC40 controller {};
-	midimap mapping = parse_mapping();
+	//midimap mapping = parse_mapping();
+	//APC40 controller {&model, &mapping};
+	
+	void (Test::*fptr) ();
+   	fptr = &Test::blah;
+	(model.*fptr)();
+	fptr = &Test::lala;
+	(model.*fptr)();
+	//Member_Pointer<model*> model_pointer;
 
-	model.blah();
-	controller(1, 2, 3);
+	//controller(1, 2, 3);
 
-	route(&model, &controller, &mapping);
+	//route "presses the buttons" on the virtual controller
+	//route(&controller);
 
 	return 0;
 }

@@ -7,9 +7,13 @@ class Test : public Model
 public:
 	Test() {}
 	void blah();
+	void lala()
+	{
+		cout << "LALALALLA" << endl;
+	}
 };
 
 void Test::blah()
 {
-	cout << "hello" << endl;
+	cout << "BLAH BLAH BLAH" << endl;
 }

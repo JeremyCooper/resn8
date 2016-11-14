@@ -4,9 +4,9 @@
 
 #include "controllers.h"
 
-void initController(string data)
+void return_controller(string name)
 {
-	if (data == "apc40")
+	if (name == "apc40")
 	{
 		//return APC40();
 	}

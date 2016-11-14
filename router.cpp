@@ -2,12 +2,20 @@
 //
 //
 
-void route(Test * model, APC40 * controller, midimap * mapping)
+typedef void (*fn) ();
+
+void route(APC40 * controller)
 {
 	int page = 0;
 	int channel = 2;
 	int note = 3;
 
-	Operation operation = (*mapping)[page][channel][note];
-	cout << operation.return_parameter(1) << endl;
+	cout << page << channel << note << endl;
+
+	//Operation operation = (*mapping)[page][channel][note];
+	//fn fnptr = blah;
+	//operation.set_target(blah);
+	//cout << operation.return_target()() << endl;
+
+	//auto fn5(1) = std::bind(model.opacity, 45);
 }
