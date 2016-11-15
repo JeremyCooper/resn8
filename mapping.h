@@ -2,20 +2,40 @@
 //
 //
 
-template<class T> class Member_Pointer
+class Member_Pointer
 {
 public:
-	Member_Pointer(T operation);
-	void set_pointer(T operation);
+	Member_Pointer() {}
+	Member_Pointer(const char, string, Test *, APC80 *);
+	void operator()();
+	void function1();
 private:
-	T operation;
+	char obj;
+	Test * model;
+	APC80 * controller;
+	Test::TestPtr model_oper;
+	APC80::ApcPtr contrl_oper;
 };
-template<class T> Member_Pointer<T>::Member_Pointer(T operation)
+Member_Pointer::Member_Pointer(
+		char obj, string operation_name, Test * model, APC80 * controller)
+		: obj (obj), model (model), controller (controller)
 {
-	this->operation = operation;
+	if (obj == 'M')
+	{
+		model_oper = model->returnPointer(operation_name);
+		this->obj = 'M';
+	}
+	else if (obj == 'C')
+	{
+		contrl_oper = controller->returnPointer(operation_name);
+		this->obj = 'C';
+	}
+//	operation_name
 }
-
-template<class T> void Member_Pointer<T>::set_pointer(T operation)
+void Member_Pointer::operator()()
 {
-	this->operation = operation;
+	if (obj == 'M')
+		(*model.*model_oper)();
+	else if (obj == 'C')
+		(*controller.*contrl_oper)();
 }

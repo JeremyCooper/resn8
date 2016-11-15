@@ -2,12 +2,14 @@
 //
 //Load models including their internal interface and states
 
-#include <vector>
-#include <algorithm>
-//using namespace std;
-
 class Model
 {
 public:
-protected:
+	void operator()();
+private:
+	typedef void (Model::*ptr) ();
+	map<string, ptr>  hooks;
 };
+void Model::operator()() {}
+
+typedef void (Model::*ModelPtr) ();

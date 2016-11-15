@@ -5,15 +5,22 @@
 class Test : public Model 
 {
 public:
-	Test() {}
-	void blah();
+	Test()
+	{
+		hooks["lala"] = &Test::lala;
+	}
 	void lala()
 	{
-		cout << "LALALALLA" << endl;
+		cout << "Test::lala()" << endl;
 	}
+	typedef void (Test::*TestPtr) ();
+	TestPtr returnPointer(string operation_name);
+private:
+	map<string, TestPtr> hooks;
 };
-
-void Test::blah()
+Test::TestPtr Test::returnPointer(string operation_name)
 {
-	cout << "BLAH BLAH BLAH" << endl;
+	TestPtr ptr = &Test::lala;
+	return ptr;
 }
+

@@ -5,38 +5,30 @@
 #include <algorithm>
 #include <vector>
 #include <map>
-//config
 using namespace std;
-//typedef vector<map<int, map<int, operation>>> midimap;
-//midimap[page][channel][note]
 //interface to midi library
 //#include "midi.h"
 //internal models and interfaces for attached software
 #include "models.h"
 #include "testmodel.h"
-#include "mapping.cpp"
 #include "controllers.h"
-#include "router.cpp"
-//user controllers
 #include "apc80.h"
+#include "mapping.cpp"
+#include "router.cpp"
+
+typedef vector<map<int, map<int, Member_Pointer>>> midimap;
 
 int main()
 {
 	Test model {};
-	//midimap mapping = parse_mapping();
-	//APC40 controller {&model, &mapping};
+	APC80 controller {};
+	midimap mapping = parse_mapping(&model, &controller);
 	
-	void (Test::*fptr) ();
-   	fptr = &Test::blah;
-	(model.*fptr)();
-	fptr = &Test::lala;
-	(model.*fptr)();
-	//Member_Pointer<model*> model_pointer;
+	mapping[0][1][2]();
 
 	//controller(1, 2, 3);
 
-	//route "presses the buttons" on the virtual controller
-	//route(&controller);
+	//route(&midimap);
 
 	return 0;
 }

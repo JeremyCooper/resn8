@@ -2,9 +2,7 @@
 //
 //
 
-typedef void (*fn) ();
-
-void route(APC40 * controller)
+void route(APC80 * controller)
 {
 	int page = 0;
 	int channel = 2;
