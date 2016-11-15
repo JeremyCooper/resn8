@@ -16,7 +16,6 @@ using namespace std;
 #include "mapping.cpp"
 #include "router.cpp"
 
-typedef vector<map<int, map<int, Member_Pointer>>> midimap;
 
 int main()
 {
@@ -25,10 +24,11 @@ int main()
 	midimap mapping = parse_mapping(&model, &controller);
 	
 	mapping[0][1][2]();
+	mapping[1][1][2]();
 
 	//controller(1, 2, 3);
 
-	//route(&midimap);
+	route(&mapping);
 
 	return 0;
 }

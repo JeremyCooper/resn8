@@ -9,10 +9,7 @@ public:
 	{
 		hooks["lala"] = &Test::lala;
 	}
-	void lala()
-	{
-		cout << "Test::lala()" << endl;
-	}
+	void lala() { cout << "Test::lala()" << endl; }
 	typedef void (Test::*TestPtr) ();
 	TestPtr returnPointer(string operation_name);
 private:
@@ -20,7 +17,9 @@ private:
 };
 Test::TestPtr Test::returnPointer(string operation_name)
 {
-	TestPtr ptr = &Test::lala;
+	auto index = hooks.find(operation_name);
+	if (index != hooks.end())
+		return hooks[operation_name];
 	return ptr;
 }
 

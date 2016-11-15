@@ -7,6 +7,8 @@ class Member_Pointer
 public:
 	Member_Pointer() {}
 	Member_Pointer(const char, string, Test *, APC80 *);
+	Member_Pointer(Test * model, string operation_name);
+	Member_Pointer(APC80 * controller, string operation_name);
 	void operator()();
 	void function1();
 private:
@@ -16,21 +18,15 @@ private:
 	Test::TestPtr model_oper;
 	APC80::ApcPtr contrl_oper;
 };
-Member_Pointer::Member_Pointer(
-		char obj, string operation_name, Test * model, APC80 * controller)
-		: obj (obj), model (model), controller (controller)
+Member_Pointer::Member_Pointer(Test * model, string operation_name)
 {
-	if (obj == 'M')
-	{
-		model_oper = model->returnPointer(operation_name);
-		this->obj = 'M';
-	}
-	else if (obj == 'C')
-	{
-		contrl_oper = controller->returnPointer(operation_name);
-		this->obj = 'C';
-	}
-//	operation_name
+	model_oper = model->returnPointer(operation_name);
+	obj = 'M';
+}
+Member_Pointer::Member_Pointer(APC80 * controller, string operation_name)
+{
+	contrl_oper = controller->returnPointer(operation_name);
+	obj = 'C';
 }
 void Member_Pointer::operator()()
 {
@@ -39,3 +35,5 @@ void Member_Pointer::operator()()
 	else if (obj == 'C')
 		(*controller.*contrl_oper)();
 }
+
+typedef vector<map<int, map<int, Member_Pointer>>> midimap;
