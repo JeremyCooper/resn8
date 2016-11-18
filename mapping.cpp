@@ -3,8 +3,9 @@
 //
 
 #include <fstream>
+#include <algorithm>
+#include <boost/algorithm/string/trim.hpp>
 #include "mapping.h"
-
 //example mapping:
 // 1, 2, 3, blah(1, 2, 3)
 midimap parse_mapping(Test * model, APC80 * controller)
@@ -12,9 +13,52 @@ midimap parse_mapping(Test * model, APC80 * controller)
 	midimap mapping;
 	mapping.resize(4); //number of pages
 
-	mapping[0][1][2] = Member_Pointer(controller, "blah");
-	mapping[1][1][2] = Member_Pointer(model, "lala");
-	//open file "page1", and read line-by-line, populating mapping vector
+	ifstream mapFileIn {"mapping.txt", ios::in };
+	string readLine;
+
+	while(mapFileIn.good())
+	{
+		//returns once unneededly at the end
+		string page_, channel_, note_;
+		int page, channel, note;
+		string obj, operation, rawparams;
+		vector<int> params;
+		//grab page
+		getline(mapFileIn, page_, ',');
+		boost::algorithm::trim(page_);
+		//grab channel
+		getline(mapFileIn, channel_, ',');
+		boost::algorithm::trim(channel_);
+		//grab note
+		getline(mapFileIn, note_, ',');
+		boost::algorithm::trim(note_);
+		//grab obj
+		getline(mapFileIn, obj, ',');
+		boost::algorithm::trim(obj);
+		//grab operation
+		getline(mapFileIn, operation, '(');
+		boost::algorithm::trim(operation);
+		//grab params
+		getline(mapFileIn, rawparams, ')');
+		//break params by ',', trim whitespace, add to vector
+		boost::algorithm::trim(rawparams);
+
+		/*cout << page << channel << note << endl;
+		cout << obj << operation << rawparams << endl;*/
+
+		//how to gracefully exit if reading an empty line?
+		if (operation == "")
+			break;
+
+		page = stoi(page_);
+		channel = stoi(channel_);
+		note = stoi(note_);
+
+		if (obj == "model")
+			mapping[page][channel][note] = Member_Pointer(model, operation);
+		else if (obj == "controller")
+			mapping[page][channel][note] = Member_Pointer(controller, operation);
+	}
 
 	return mapping;
 }

@@ -25,4 +25,3 @@ Test::TestPtr Test::returnPointer(string operation_name)
 		return hooks[operation_name];
 	return nullptr;
 }
-

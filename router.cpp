@@ -2,6 +2,9 @@
 //
 //
 
+//rtmidi or other midi library
+//#include "midi.h"
+
 void route(midimap * mapping)
 {
 	int page = 0;

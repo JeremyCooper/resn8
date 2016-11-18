@@ -6,14 +6,14 @@
 #include <vector>
 #include <map>
 using namespace std;
-//interface to midi library
-//#include "midi.h"
-//internal models and interfaces for attached software
+//internal models and interfaces for attached software and user-defined controllers
 #include "models.h"
 #include "testmodel.h"
 #include "controllers.h"
 #include "apc80.h"
+//Member_Pointer object, midimap structure, and mapping file parser
 #include "mapping.cpp"
+//implements midi library and routes midi input to relevant pointer
 #include "router.cpp"
 
 
