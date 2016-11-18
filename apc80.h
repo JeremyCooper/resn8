@@ -9,8 +9,11 @@ public:
 	{
 		hooks["blah"] = &APC80::blah;
 	}
-	void blah() { cout << "APC80::blah()" << endl; }
-	typedef void (APC80::*ApcPtr) ();
+	int blah(float value) {
+		cout << "APC80::blah()" << endl << "Value: " << value << endl;
+		return 0;
+	}
+	typedef int (APC80::*ApcPtr) (float);
 	ApcPtr returnPointer(string operation_name);
 private:
 	map<string, ApcPtr> hooks;

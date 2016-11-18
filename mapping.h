@@ -6,10 +6,9 @@ class Member_Pointer
 {
 public:
 	Member_Pointer() {}
-	Member_Pointer(const char, string, Test *, APC80 *);
 	Member_Pointer(Test * model, string operation_name);
 	Member_Pointer(APC80 * controller, string operation_name);
-	void operator()();
+	int operator()(float value);
 	void function1();
 private:
 	char obj;
@@ -28,12 +27,13 @@ Member_Pointer::Member_Pointer(APC80 * controller, string operation_name)
 	contrl_oper = controller->returnPointer(operation_name);
 	obj = 'C';
 }
-void Member_Pointer::operator()()
+int Member_Pointer::operator()(float value)
 {
 	if (obj == 'M')
-		(*model.*model_oper)();
+		return (*model.*model_oper)(value);
 	else if (obj == 'C')
-		(*controller.*contrl_oper)();
+		return (*controller.*contrl_oper)(value);
+	return 1;
 }
 
 typedef vector<map<int, map<int, Member_Pointer>>> midimap;

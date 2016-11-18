@@ -23,9 +23,6 @@ int main()
 	APC80 controller {};
 	midimap mapping = parse_mapping(&model, &controller);
 	
-	mapping[0][1][2]();
-	mapping[1][1][2]();
-
 	//controller(1, 2, 3);
 
 	route(&mapping);
