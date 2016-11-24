@@ -5,10 +5,11 @@
 #include <fstream>
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/erase.hpp>
 #include "mapping.h"
 //example mapping:
 // 1, 2, 3, blah(1, 2, 3)
-midimap parse_mapping(Test * model, APC80 * controller)
+midimap parse_mapping(APC80 * controller)
 {
 	midimap mapping;
 	mapping.resize(4); //number of pages
@@ -41,23 +42,31 @@ midimap parse_mapping(Test * model, APC80 * controller)
 		//grab params
 		getline(mapFileIn, rawparams, ')');
 		//break params by ',', trim whitespace, add to vector
-		boost::algorithm::trim(rawparams);
-
-		/*cout << page << channel << note << endl;
-		cout << obj << operation << rawparams << endl;*/
-
+		boost::algorithm::erase_all(rawparams, " ");
 		//how to gracefully exit if reading an empty line?
 		if (operation == "")
 			break;
+		size_t pos = 0;
+		string token;
+		while ((pos = rawparams.find(",")) != string::npos)
+		{
+			token = rawparams.substr(0, pos);
+			params.push_back(stoi(token));
+			rawparams.erase(0, pos + 1);
+		}
+		//get last argument
+		token = rawparams.substr(0, rawparams.length());
+		params.push_back(stoi(token));
 
 		page = stoi(page_);
 		channel = stoi(channel_);
 		note = stoi(note_);
 
 		if (obj == "model")
-			mapping[page][channel][note] = Member_Pointer(model, operation);
+			mapping[page][channel][note] =
+				Member_Pointer(controller->model, operation, params);
 		else if (obj == "controller")
-			mapping[page][channel][note] = Member_Pointer(controller, operation);
+			mapping[page][channel][note] = Member_Pointer(controller, operation, params);
 	}
 
 	return mapping;

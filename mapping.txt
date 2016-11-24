@@ -1,2 +1,6 @@
-0, 1, 2, controller, blah(1, 4, 7)
-1, 2, 3, model, lala(ABSOLUTELY PROPRIETARY)
+1, 0, 0, controller, blah(1, 4, 7)
+1, 0, 1, model, lala(40, 7, 9)
+0, 1, 1, controller, selectMotion(0)
+1, 1, 1, controller, selectMotion(1)
+0, 1, 2, controller, selectPage(0)
+0, 1, 3, controller, selectPage(1)

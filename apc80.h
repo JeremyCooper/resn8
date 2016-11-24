@@ -5,19 +5,27 @@
 class APC80 : public Controller
 {
 public:
-	APC80()
+	APC80(Test * model) : model(model), page(1)
 	{
 		hooks["blah"] = &APC80::blah;
 	}
-	int blah(float value) {
-		cout << "APC80::blah()" << endl << "Value: " << value << endl;
-		return 0;
-	}
-	typedef int (APC80::*ApcPtr) (float);
+	int blah(float value, vector<int> args);
+	typedef int (APC80::*ApcPtr) (float, vector<int>);
 	ApcPtr returnPointer(string operation_name);
+	Test * model;
+	int page;
 private:
 	map<string, ApcPtr> hooks;
 };
+int APC80::blah(float value, vector<int> args)
+{
+	cout << "APC80::blah" << endl;
+	cout << "Arguments: ";
+	for (unsigned int i=0; i!=args.size(); ++i)
+		cout << args[i] << ", ";
+	cout << endl << "Value: " << value << endl;
+	return 0;
+}
 APC80::ApcPtr APC80::returnPointer(string operation_name)
 {
 	auto index = hooks.find(operation_name);
