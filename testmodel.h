@@ -7,13 +7,11 @@ class Test : public Model
 public:
 	Test()
 	{
-		//page = 0;
 		hooks["lala"] = &Test::lala;
 	}
 	int lala(float, vector<int>);
 	typedef int (Test::*TestPtr) (float, vector<int>);
 	TestPtr returnPointer(string operation_name);
-	//int page;
 private:
 	map<string, TestPtr> hooks;
 };

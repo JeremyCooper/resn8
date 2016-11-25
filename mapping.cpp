@@ -7,8 +7,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include "mapping.h"
-//example mapping:
-// 1, 2, 3, blah(1, 2, 3)
+
 midimap parse_mapping(APC80 * controller)
 {
 	midimap mapping;
@@ -19,33 +18,32 @@ midimap parse_mapping(APC80 * controller)
 
 	while(mapFileIn.good())
 	{
-		//returns once unneededly at the end
 		string page_, channel_, note_;
 		int page, channel, note;
 		string obj, operation, rawparams;
 		vector<int> params;
-		//grab page
 		getline(mapFileIn, page_, ',');
 		boost::algorithm::trim(page_);
-		//grab channel
+
 		getline(mapFileIn, channel_, ',');
 		boost::algorithm::trim(channel_);
-		//grab note
+
 		getline(mapFileIn, note_, ',');
 		boost::algorithm::trim(note_);
-		//grab obj
+
 		getline(mapFileIn, obj, ',');
 		boost::algorithm::trim(obj);
-		//grab operation
+
 		getline(mapFileIn, operation, '(');
 		boost::algorithm::trim(operation);
-		//grab params
+
 		getline(mapFileIn, rawparams, ')');
-		//break params by ',', trim whitespace, add to vector
 		boost::algorithm::erase_all(rawparams, " ");
 		//how to gracefully exit if reading an empty line?
 		if (operation == "")
 			break;
+
+		//need to seperate individual params, delimited by commas
 		size_t pos = 0;
 		string token;
 		while ((pos = rawparams.find(",")) != string::npos)
@@ -54,7 +52,7 @@ midimap parse_mapping(APC80 * controller)
 			params.push_back(stoi(token));
 			rawparams.erase(0, pos + 1);
 		}
-		//get last argument
+		//this method leaves out the last param, grab it here
 		token = rawparams.substr(0, rawparams.length());
 		params.push_back(stoi(token));
 

@@ -48,10 +48,16 @@ int main()
 	Test model {}; //Select model with initializer string
 	APC80 controller {&model}; //Model is used by controller
 	RtMidiIn *midiin = new RtMidiIn();
-
 	mapping = parse_mapping(&controller);
-	midiin->openPort(1);
-	midiin->setCallback(&route);
+
+	//prevent opening a port if correct controller isn't found
+	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
+		if (midiin->getPortName(i) == "AKAI")
+		{
+			midiin->openPort(i);
+			midiin->setCallback(&route);
+			return 80;
+		}
 
 	cout << "\nReading MIDI input .. press <enter> to quit.\n";
 	cin.get();
@@ -60,5 +66,6 @@ int main()
 }
 
 /* ERROR CODES:
- * 99: Not found
+ * 99: Mapping not found
+ * 80: MIDI controller not found
  */
