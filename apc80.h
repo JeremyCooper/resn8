@@ -8,16 +8,20 @@ public:
 	APC80(Test * model) : model(model), page(1)
 	{
 		hooks["blah"] = &APC80::blah;
+		hooks["master"] = &APC80::master;
+		testInt = 42;
 	}
-	int blah(float value, vector<int> args);
-	typedef int (APC80::*ApcPtr) (float, vector<int>);
+	int master(int value, vector<int> args) { cout << testInt << endl; }
+	int blah(int value, vector<int> args);
+	typedef int (APC80::*ApcPtr) (int, vector<int>);
 	ApcPtr returnPointer(string operation_name);
 	Test * model;
 	int page;
 private:
 	map<string, ApcPtr> hooks;
+	int testInt;
 };
-int APC80::blah(float value, vector<int> args)
+int APC80::blah(int value, vector<int> args)
 {
 	cout << "APC80::blah" << endl;
 	cout << "Arguments: ";

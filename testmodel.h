@@ -5,17 +5,26 @@
 class Test : public Model 
 {
 public:
-	Test()
+	Test(void (*sendMidi) (Reference, int)) : sendMidi(sendMidi)
 	{
 		hooks["lala"] = &Test::lala;
+		fillDictionary();
 	}
-	int lala(float, vector<int>);
-	typedef int (Test::*TestPtr) (float, vector<int>);
+	//Mappable functions//
+	int lala(int, vector<int>);
+	int master(int, vector<int>);
+	//////////////////////
+	void fillDictionary();
+	typedef int (Test::*TestPtr) (int, vector<int>);
 	TestPtr returnPointer(string operation_name);
 private:
+	void (*sendMidi) (Reference, int); //pointer to sendMidi function
 	map<string, TestPtr> hooks;
+	map<string, Reference> dict;
 };
-int Test::lala(float value, vector<int> args)
+
+//Mappable functions//
+int Test::lala(int value, vector<int> args)
 {
 	cout << "Test::lala" << endl;
 	cout << "Arguments: ";
@@ -23,6 +32,11 @@ int Test::lala(float value, vector<int> args)
 		cout << args[i] << ", ";
 	cout << endl << "Value: " << value << endl;
 	return 0;
+}
+//////////////////////
+void Test::fillDictionary()
+{
+	dict["master"] = { 144, 20 };
 }
 Test::TestPtr Test::returnPointer(string operation_name)
 {

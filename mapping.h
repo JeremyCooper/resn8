@@ -8,8 +8,7 @@ public:
 	Member_Pointer() { obj = '!'; }
 	Member_Pointer(Test * model, string operation_name, vector<int> args);
 	Member_Pointer(APC80 * controller, string operation_name, vector<int> args);
-	int operator()(float value);
-	void function1();
+	char operator()(Test::TestPtr& controller_out, APC80::ApcPtr& model_out);
 private:
 	char obj;
 	vector<int> arguments;
@@ -30,15 +29,23 @@ Member_Pointer::Member_Pointer(APC80 * controller, string operation_name, vector
 	arguments = args;
 	obj = 'C';
 }
-int Member_Pointer::operator()(float value)
+char Member_Pointer::operator()(
+		Test::TestPtr& model_out, APC80::ApcPtr& controller_out)
 {
 	if (obj == '!')
-		return 99;
+	{
+		return '!';
+	}
 	else if (obj == 'M')
-		return (*model.*model_oper)(value, arguments);
+	{
+		model_out = model_oper;
+		return 'M';
+	}
 	else if (obj == 'C')
-		return (*controller.*contrl_oper)(value, arguments);
-	return 1;
+	{
+		controller_out = contrl_oper;
+		return 'C';
+	}
 }
 
 typedef vector<map<int, map<int, Member_Pointer>>> midimap;

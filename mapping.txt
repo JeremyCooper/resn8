@@ -1,5 +1,5 @@
-1, 0, 0, controller, blah(1, 4, 7)
-1, 0, 1, model, lala(40, 7, 9)
+0, 0, 0, model, master(120)
+1, 0, 1, model.res, lala(40, 7, 9)
 0, 1, 1, controller, selectMotion(0)
 1, 1, 1, controller, selectMotion(1)
 0, 1, 2, controller, selectPage(0)

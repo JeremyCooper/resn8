@@ -2,6 +2,13 @@
 //
 //Load models including their internal interface and states
 
+struct Reference
+{
+	Reference() {}
+	Reference(int channel, int note) : channel(channel), note(note) {}
+	int channel, note;
+};
+
 class Model
 {
 public:
@@ -11,5 +18,3 @@ private:
 	map<string, ptr>  hooks;
 };
 void Model::operator()() {}
-
-typedef void (Model::*ModelPtr) ();
