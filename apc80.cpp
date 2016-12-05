@@ -15,7 +15,7 @@ void APC80::fillDictionary()
 //////////////////////////////////////////
 int APC80::resetLayer(int value, vector<int> args)
 {
-	//condense these returns and return based on that
+	//condense these returns and return based on that	
 	send("r", 0);
 	send("g", 0);
 	send("b", 0);

@@ -4,6 +4,8 @@
 /* TODO:
  * Implement midiout
  * Hard-coded parameters
+ * Use typedef to declare controller
+     -change controller object in one spot and done
  * Create functional testmodel and testcontroller
  * Midi input from attached software (midi input from multiple sources) 
  */
@@ -50,8 +52,8 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	if (nBytes > 0)
 		cout << "stamp = " << deltatime << endl;
 #endif
-	auto apcptr = mapping[*page][channel][note];
-	cout << "Return code: " << (controller.*apcptr)(value, vector<int> { 1 }) << endl;
+	auto op = mapping[*page][channel][note];
+	cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
 int main()
@@ -66,10 +68,8 @@ int main()
 	tnote = 0;
 	tvalue = 0;
 
-	//APC80::ApcPtr
-	auto apcptr = mapping[tpage][tchan][tnote];
-	//call pointer with tvalue as value and vector<int> param list. Cout the return code. 
-	cout << "Return code: " << (controller.*apcptr)(tvalue, vector<int> { 1 }) << endl;
+	auto op = mapping[tpage][tchan][tnote];
+	cout << "Return code: " << (controller.*op.ptr)(tvalue, op.params) << endl;
 	return 0;
 #endif
 

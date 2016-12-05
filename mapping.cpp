@@ -6,7 +6,7 @@
 #include "mapping.h"
 using namespace std;
 
-typedef vector<map<int, map<int, APC80::Ptr>>> midimap;
+typedef vector<map<int, map<int, Operation>>> midimap;
 
 midimap parse_mapping(APC80 * controller)
 {
@@ -57,7 +57,8 @@ midimap parse_mapping(APC80 * controller)
 		channel = stoi(channel_);
 		note = stoi(note_);
 
-		mapping[page][channel][note] = controller->returnPointer(operation);
+		APC80::Ptr apcptr = controller->returnPointer(operation);
+		mapping[page][channel][note] = Operation {apcptr, params};
 	}
 
 	return mapping;
