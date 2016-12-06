@@ -40,18 +40,21 @@ midimap parse_mapping(APC80 * controller)
 		if (operation == "")
 			break;
 
-		//need to seperate individual params, delimited by commas
-		size_t pos = 0;
-		string token;
-		while ((pos = rawparams.find(",")) != string::npos)
+		if (rawparams.length() != 0)
 		{
-			token = rawparams.substr(0, pos);
+			//need to seperate individual params, delimited by commas
+			size_t pos = 0;
+			string token;
+			while ((pos = rawparams.find(",")) != string::npos)
+			{
+				token = rawparams.substr(0, pos);
+				params.push_back(stoi(token));
+				rawparams.erase(0, pos + 1);
+			}
+			//this method leaves out the last param, grab it here
+			token = rawparams.substr(0, rawparams.length());
 			params.push_back(stoi(token));
-			rawparams.erase(0, pos + 1);
 		}
-		//this method leaves out the last param, grab it here
-		token = rawparams.substr(0, rawparams.length());
-		params.push_back(stoi(token));
 
 		page = stoi(page_);
 		channel = stoi(channel_);

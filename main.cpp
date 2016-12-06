@@ -3,7 +3,6 @@
 
 /* TODO:
  * Implement midiout
- * Hard-coded parameters
  * Use typedef to declare controller
      -change controller object in one spot and done
  * Create functional testmodel and testcontroller
@@ -11,7 +10,6 @@
  */
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
 #include <map>
 using namespace std;
@@ -34,9 +32,9 @@ int sendMidi(Reference _ref, int value)
 	return 0;
 }
 
-//::::::::::::::::::::::::::
+//:::::::::::::::::::::::::::
 APC80 controller {&sendMidi};
-//::::::::::::::::::::::::::
+//:::::::::::::::::::::::::::
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
@@ -92,5 +90,6 @@ int main()
 
 /* ERROR CODES:
  * 99: Mapping not found
+ * 85: Out of bounds
  * 80: MIDI controller not found
  */
