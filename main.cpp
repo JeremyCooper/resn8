@@ -9,6 +9,12 @@
  * Create functional testmodel and testcontroller
  * Midi input from attached software (midi input from multiple sources) 
  */
+//FIXME TODO FIXME TODO FIXME TODO
+//d_midi, d_route, d_parser
+//apc80, james
+#define d_route
+#define jeremy
+//FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
 #include <vector>
@@ -17,17 +23,14 @@ using namespace std;
 #include "RtMidi.h"
 #include "testmodel.cpp"
 #include "feedbackClass.cpp"
+vector<int> currentGroupPage(10); //max pages
 #include "apc80.cpp"
+
+map<pair<int, int>, int> groups;
 #include "mapping.cpp"
 
 midimap mapping;
-const int * page;
-int channel, note, value;
-
-//d_midi, d_route
-#define d_route
-//apc80, james
-#define jeremy
+int channel, note, opGroup, page, value;
 
 int sendMidi(Reference _ref, int value)
 {
@@ -46,9 +49,10 @@ APC80 controller {&sendMidi};
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
-	page = &controller.page;
 	channel = (int)message->at(0) - 128;
 	note = (int)message->at(1);
+	opGroup = groups[{channel, note}];
+	page = currentGroupPage[opGroup];
 	value = (int)message->at(2);
 	
 #ifdef d_midi
@@ -58,7 +62,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	if (nBytes > 0)
 		cout << "stamp = " << deltatime << endl;
 #endif
-	auto op = mapping[*page][channel][note];
+	auto op = mapping[page][channel][note];
 	cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
@@ -69,14 +73,16 @@ int main()
 
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
-	tpage = 0;
 	tchan = 0;
 	tnote = 0;
+	opGroup = groups[{channel, note}];
+	tpage = currentGroupPage[opGroup];
 	tvalue = 0;
 
 	auto op = mapping[tpage][tchan][tnote];
-	cout << "Return code: " << (controller.*op.ptr)(tvalue, op.params) << endl;
-	return 0;
+	int returnVal = (controller.*op.ptr)(tvalue, op.params);
+	cout << "Return code: " << returnVal << endl;
+	return returnVal;
 #endif
 
 	//prevent opening a port if correct controller isn't found

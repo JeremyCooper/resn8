@@ -59,10 +59,12 @@ int APC80::resetLayer(int value, vector<int> args)
 }
 int APC80::red(int value, vector<int> args)
 {
+	//cout << currentGroupPage[0] << endl;
 	string layer = to_string(states["currentLayer"]);
 	//send("r"+layer, value);
-	changeBackgroundLayer(0, vector<int> {0} );
-	changeBackgroundLayer(0, vector<int> {1} );
+	for (auto& i : args)
+		cout << i;
+	cout << endl;
 	return 0;
 }
 int APC80::green(int value, vector<int> args)
