@@ -14,8 +14,9 @@ public:
 	int red_bg(int value, vector<int> args);
 	//////////////////////
 	int send(string, int);
+	int send(string, char, int);
 	void setupFeedback();
-	void updateFeedback(vector<string>);
+	void updateFeedback(vector<string>, string);
 	void setupStates();
 	void fillHooks();
 	typedef int (APC80::*Ptr) (int, vector<int>);

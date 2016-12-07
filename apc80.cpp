@@ -26,16 +26,26 @@ int APC80::changeCurrentSCP(int value, vector<int> args)
 	states["currentSCP"] = page;
 	return 0;
 }
-int APC80::changeLayer(int value, vector<int> args)
+int APC80::changeLayer(int value, vector<int> args = {})
 {
 	int layer = args[0];
+	string ls = to_string(layer);
 	states["currentLayer"] = layer;
+	vector<string> elements = {
+		"r", "g", "b"
+	};
+	updateFeedback(elements, ls);
 	return 0;
 }
 int APC80::changeBackgroundLayer(int value, vector<int> args)
 {
 	int layer = args[0];
+	string ls = to_string(layer);
 	states["backgroundLayer"] = layer;
+	vector<string> elements = {
+		"r_bg", "g_bg", "b_bg"
+	};
+	updateFeedback(elements, ls);
 	return 0;
 }
 int APC80::resetLayer(int value, vector<int> args)
@@ -50,7 +60,9 @@ int APC80::resetLayer(int value, vector<int> args)
 int APC80::red(int value, vector<int> args)
 {
 	string layer = to_string(states["currentLayer"]);
-	send("r"+layer, value);
+	//send("r"+layer, value);
+	changeBackgroundLayer(0, vector<int> {0} );
+	changeBackgroundLayer(0, vector<int> {1} );
 	return 0;
 }
 int APC80::green(int value, vector<int> args)
@@ -78,10 +90,22 @@ void APC80::setupFeedback()
 		send(i.first, i.second.value);
 	}
 }
-void APC80::updateFeedback(vector<string> elements)
+void APC80::updateFeedback(vector<string> elements, string layer)
 {
-	for (auto i=elements.begin(); i!=elements.end(); ++i)
-		feedback(*i, feedback.dict[*i].value); 
+	for (auto const& i : elements)
+	{
+		string elementIt = i;
+		string postfix = "";
+		if (i.length() > 3)
+		{
+			postfix = i.substr(i.length()-3, 3);
+			if (postfix == "_bg")
+				elementIt = i.substr(0, i.length()-3);
+		}
+		string inputIt = elementIt+layer;
+		int value = model.dict[inputIt].value;
+		feedback(elementIt+postfix, value);
+	}
 }
 void APC80::setupStates()
 {
@@ -95,6 +119,25 @@ int APC80::send(string element, int value)
 {
 	model(element, value);
 	feedback(element, value);
+	return 0;
+}
+//use this function in cases where foreground and background (or other variants)
+//dictionary map keys differ
+int APC80::send(string element, char var, int value)
+{
+	if (var == 'F') //foreground
+	{
+		string layer = to_string(states["currentLayer"]);
+		model(element+layer, value);
+		feedback(element, value);
+	} else if (var == 'B')
+	{
+		string layer = to_string(states["backgroundLayer"]);
+		model(element+layer, value);
+		feedback(element+"_bg", value);
+	} else {
+		return 70;
+	}
 	return 0;
 }
 APC80::APC80(int (*sendMidi) (Reference, int)) :

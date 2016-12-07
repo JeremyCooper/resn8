@@ -4,7 +4,6 @@
 /* TODO:
  * Implement midiout
  * Create seperate header file(s) containing utilities
- * Store control-element values for redisplaying feedback UI when switching pages or layers
  * Use typedef to declare controller
      -change controller object in one spot and done
  * Create functional testmodel and testcontroller
@@ -101,4 +100,4 @@ int main()
  * 99: Mapping not found
  * 85: Out of bounds
  * 80: MIDI controller not found
- */
+ * 70: Invalid char for send function */

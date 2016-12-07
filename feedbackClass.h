@@ -12,7 +12,6 @@ public:
 	Feedback(int (*sendMidi) (Reference, int));
 	void fillDictionary();
 	int operator()(string, int);
-	int savedClipView(savedClipViewStruct);
 	map<string, Reference> dict;
 private:
 	int (*sendMidi) (Reference, int);
