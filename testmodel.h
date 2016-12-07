@@ -3,9 +3,9 @@ using namespace std;
 struct Reference
 {
 	Reference() {}
-	Reference(int channel, int note, int initial) :
-		channel(channel), note(note), initial(initial) {}
-	int channel, note, initial;
+	Reference(int channel, int note, int value) :
+		channel(channel), note(note), value(value) {}
+	int channel, note, value;
 };
 class Test
 {

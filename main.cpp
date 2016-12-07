@@ -3,6 +3,8 @@
 
 /* TODO:
  * Implement midiout
+ * Create seperate header file(s) containing utilities
+ * Store control-element values for redisplaying feedback UI when switching pages or layers
  * Use typedef to declare controller
      -change controller object in one spot and done
  * Create functional testmodel and testcontroller
@@ -25,6 +27,8 @@ int channel, note, value;
 
 //d_midi, d_route
 #define d_route
+//apc80, james
+#define jeremy
 
 int sendMidi(Reference _ref, int value)
 {
@@ -33,7 +37,12 @@ int sendMidi(Reference _ref, int value)
 }
 
 //:::::::::::::::::::::::::::
+#ifdef jeremy
 APC80 controller {&sendMidi};
+#endif
+#ifdef james
+//james controller here
+#endif
 //:::::::::::::::::::::::::::
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)

@@ -15,6 +15,7 @@ public:
 	//////////////////////
 	int send(string, int);
 	void setupFeedback();
+	void updateFeedback(vector<string>);
 	void setupStates();
 	void fillHooks();
 	typedef int (APC80::*Ptr) (int, vector<int>);

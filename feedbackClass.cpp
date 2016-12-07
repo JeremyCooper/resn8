@@ -20,5 +20,6 @@ Feedback::Feedback(int (*sendMidi) (Reference, int)) : sendMidi(sendMidi)
 }
 int Feedback::operator()(string element, int value)
 {
+	dict[element].value = value;
 	return sendMidi(dict[element], value);
 }

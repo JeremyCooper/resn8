@@ -71,15 +71,21 @@ void APC80::setupFeedback()
 	//feedback.savedClipView(scvs);
 	for (auto const& i : model.dict)
 	{
-		send(i.first, i.second.initial);
+		send(i.first, i.second.value);
 	}
 	for (auto const& i : feedback.dict)
 	{
-		send(i.first, i.second.initial);
+		send(i.first, i.second.value);
 	}
+}
+void APC80::updateFeedback(vector<string> elements)
+{
+	for (auto i=elements.begin(); i!=elements.end(); ++i)
+		feedback(*i, feedback.dict[*i].value); 
 }
 void APC80::setupStates()
 {
+	page = 1;
 	states["currentSCP"] = 0;
 	states["numberSCP"] = 3;
 	states["currentLayer"] = 0;
@@ -94,10 +100,9 @@ int APC80::send(string element, int value)
 APC80::APC80(int (*sendMidi) (Reference, int)) :
 	sendMidi(sendMidi), model {sendMidi}, feedback {sendMidi}
 {
-	page = 1;
 	fillHooks();
 	setupStates();
-	setupFeedback();
+	//setupFeedback();
 }
 APC80::Ptr APC80::returnPointer(string operation_name)
 {
