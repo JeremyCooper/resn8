@@ -101,6 +101,7 @@ midimap parse_mapping(APC80 * controller)
 		channel = stoi(channel_);
 		note = stoi(note_);
 
+		currentGroupPage[currentGroup].second++;
 		groups[{channel, note}] = currentGroup;
 #ifdef d_parser
 		cout << "Group: (" << groups[{channel, note}] << ")" << endl;

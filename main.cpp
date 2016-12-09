@@ -9,9 +9,10 @@
  * Create functional testmodel and testcontroller
  * Midi input from attached software (midi input from multiple sources) 
  */
-//FIXME TODO FIXME TODO FIXME TODO
+
 //d_midi, d_route, d_parser
 //apc80, james
+//FIXME TODO FIXME TODO FIXME TODO
 #define d_route
 #define jeremy
 //FIXME TODO FIXME TODO FIXME TODO
@@ -23,10 +24,10 @@ using namespace std;
 #include "RtMidi.h"
 #include "testmodel.cpp"
 #include "feedbackClass.cpp"
-vector<int> currentGroupPage(10); //max pages
+vector<pair<int,int>> currentGroupPage(10); //current page, last page
+map<pair<int, int>, int> groups;
 #include "apc80.cpp"
 
-map<pair<int, int>, int> groups;
 #include "mapping.cpp"
 
 midimap mapping;
@@ -52,7 +53,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	channel = (int)message->at(0) - 128;
 	note = (int)message->at(1);
 	opGroup = groups[{channel, note}];
-	page = currentGroupPage[opGroup];
+	page = currentGroupPage[opGroup].first;
 	value = (int)message->at(2);
 	
 #ifdef d_midi
@@ -76,13 +77,17 @@ int main()
 	tchan = 0;
 	tnote = 0;
 	opGroup = groups[{channel, note}];
-	tpage = currentGroupPage[opGroup];
+	tpage = currentGroupPage[opGroup].first;
 	tvalue = 0;
 
-	auto op = mapping[tpage][tchan][tnote];
-	int returnVal = (controller.*op.ptr)(tvalue, op.params);
-	cout << "Return code: " << returnVal << endl;
-	return returnVal;
+	if (controller.states["ignoreMidi"] == 0)
+	{
+		auto op = mapping[tpage][tchan][tnote];
+		int returnVal = (controller.*op.ptr)(tvalue, op.params);
+		cout << "Return code: " << returnVal << endl;
+		return returnVal;
+	}
+	return 0;
 #endif
 
 	//prevent opening a port if correct controller isn't found

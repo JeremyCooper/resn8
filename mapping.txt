@@ -1,17 +1,14 @@
-#group 3
-0, 0, 0, red(1, 2, 3)
-1, 0, 0, red(7000)
-
+0, 0, 0, changeGroupPage(0, 1, 0) 
+1, 0, 0, red()
+#group 1
+0, 0, 1, changeGroup(0, 0, 1)
 #group 2
 0, 144, 0, something(1) //on
 0, 128, 0, something(0) //off
 //0 for relative, -1 or 1 for direction
 //1, 0, 0, changeSCP(0, -1)
-
-
 //map<pair<int, int>, int> groups
 //groups[{channel, note}] = groupNumber;
 //vector<int> currentGroupPage;
-
 //opGroup = groups[{channel, note}];
-////page = currentGroupPage[opGroup];
+//page = currentGroupPage[opGroup];
