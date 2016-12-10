@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/erase.hpp>
-#include "mapping.h"
+#include "operation.h"
 using namespace std;
 
 typedef vector<map<int, map<int, Operation>>> midimap;
@@ -108,7 +108,7 @@ midimap parse_mapping(APC80 * controller)
 #endif
 
 		APC80::Ptr apcptr = controller->returnPointer(operation);
-		mapping[page][channel][note] = Operation {apcptr, params};
+		mapping[page][channel][note] = Operation {operation, apcptr, params};
 	}
 	return mapping;
 }

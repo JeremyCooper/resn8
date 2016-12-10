@@ -5,6 +5,9 @@
 using namespace std;
 void APC80::fillHooks()
 {
+	hooks["test"] = &APC80::test;
+	hooks["bindSlot"] = &APC80::bindSlot;
+	hooks["smartBind"] = &APC80::smartBind;
 	hooks["ignoreMidi"] = &APC80::ignoreMidi;
 	hooks["resetLayer"] = &APC80::resetLayer;
 	hooks["changeLayer"] = &APC80::changeLayer;
@@ -18,8 +21,83 @@ void APC80::fillHooks()
 	hooks["blue_bg"] = &APC80::blue_bg;
 	hooks["changeCurrentSCP"] = &APC80::changeCurrentSCP; // SCP = Saved Clip Page
 }
+//modular with a purpose
 //////////////////////////////////////////
-//need to update feedback for affected controls when switching group pages
+//SMART BIND NOTES AND EXPECTED USE CASES
+// "midiBehavior" functionality
+/*
+   * Animation is selected by midi button. While midi button is held,
+	 operations are added to a vector until button is released. After
+	 button is released, a save slot is chosen by pressing a midi
+	 button. If no save slot is selected within a certain time, the
+	 saved data is discarded and operation continues as normal.
+	 Quick bind animations as well as bind multiple animations to 
+	 multiple operations to be executed with the same midi button.
+	 //Animations:
+	 Ascending, Descending, Strobe
+	 Animations are handled by thread-manager. Old instance is killed
+	 as soon as new instance begins. Full overwrite, no layering.
+
+   * Execution queue mode is entered by pressing a midi button.
+     To add an event to the execution stack, a value is selected
+	 by pressing a midi button, then the operation is selected by
+	 pressing a midi button. Execution stack is saved when mode is
+	 exited and can be invoked by pressing a midi button, causing all
+	 saved executions to be triggered at once.
+
+   * Saved animations and execution stacks can be called by bpm-manager
+     functionality. Press bpm-manager, press on-beat, press animation or
+	 execution stack, press empty on-beat slot. newly added element will
+	 be triggered at next call of that bpm-manager bank.
+
+
+	 "What are some controls that will NOT be needed during animation and
+	 execution stack creation?"
+	 We can use these buttons as UI for the creation step.
+ */
+int APC80::test(int value, vector<int> args)
+{
+	cout << "testing... 1... 2... 3..." << endl;
+	return 0;
+}
+int APC80::bindSlot(int value, vector<int> args)
+{
+	tuple<Ptr, vector<int>, int> boundOp = smart_binds[args[0]];
+	Ptr bindPtr = get<0>(boundOp);
+	(this->*bindPtr)(value, get<1>(boundOp)); 
+	cout << "Animation: " << get<2>(boundOp) << endl;
+	return 0;
+}
+int APC80::smartBind(int value, vector<int> args)
+{
+	int stage = args[0];
+	if (stage == 1) //smart bind mode activated
+	{
+		cout << "stage 1" << endl;
+		midiBehavior = 2;
+	} else if (stage == 2) {
+		cout << "stage 2" << endl;
+		states["smartBindAnim"] = args[1];
+		midiBehavior = 3;
+	} else if (stage == 3) {
+		cout << "stage 3" << endl;
+		midiBehavior = 4; //ready to bind, select slot
+	} else if (stage == 4) {
+		cout << "stage 4" << endl;
+		smart_binds[args[1]] = {
+			operation_stack[0].first, operation_stack[0].second, states["smartBindAnim"] }; 
+		operation_stack.clear();
+		states["smartBindAnim"] = 0;
+		midiBehavior = 1;
+	} else if (stage == 0) {
+		cout << "stage 0 (exit prematurely)" << endl;
+		operation_stack.clear();
+		states["smartBindAnim"] = 0;
+		midiBehavior = 1;
+	}
+	//populate vector with functions activated during hold.
+	return 0;
+}
 int APC80::changeGroupPage(int value, vector<int> args)
 {
 	int targetGroup = args[0];
@@ -50,17 +128,16 @@ int APC80::changeGroupPage(int value, vector<int> args)
 		newPage = args[1];
 	}
 	currentGroupPage[targetGroup].first = newPage;
-	//get list of all members in group.
-	cout << targetGroup << ", " << newPage << endl;
+	//need to update feedback for affected controls when switching group pages
 	updateFeedback(group_members[targetGroup], pageDisplayValues[newPage]);
 	return 0;
 }
 int APC80::ignoreMidi(int value, vector<int> args)
 {
 	if (args[0] == 1)
-		states["ignoreMidi"] = 1;
+		midiBehavior = 0;
 	else
-		states["ignoreMidi"] = 0;
+		midiBehavior = 1;
 	return 0;
 }
 int APC80::changeCurrentSCP(int value, vector<int> args)
@@ -111,6 +188,7 @@ int APC80::red(int value, vector<int> args)
 }
 int APC80::green(int value, vector<int> args)
 {
+	cout << "green" << endl;
 	return send("g", value);
 }
 int APC80::blue(int value, vector<int> args)
@@ -130,6 +208,10 @@ int APC80::blue_bg(int value, vector<int> args)
 	return send("b_bg", value);
 }
 //////////////////////////////////////////
+void APC80::addOperation(Ptr operation, vector<int> args)
+{
+	operation_stack.push_back( { operation, args } );
+}
 void APC80::setupFeedback()
 {
 	//anything dynamic needed?
@@ -171,7 +253,7 @@ void APC80::updateFeedback(vector<string>& elements, string layer)
 }
 void APC80::setupStates()
 {
-	states["ignoreMidi"] = 0;
+	states["smartBindAnim"] = 0;
 	states["currentSCP"] = 0;
 	states["numberSCP"] = 3;
 	states["currentLayer"] = 0;
@@ -201,7 +283,6 @@ void APC80::setupPageDisplayValues()
 	};
 	pageDisplayValues.push_back(pg1);
 }
-//map<string, map<string, int>>
 int APC80::send(string element, int value)
 {
 	string elementId, postfix, layer;
@@ -229,6 +310,8 @@ int APC80::send(string element, int value)
 APC80::APC80(int (*sendMidi) (Reference, int)) :
 	sendMidi(sendMidi), model {sendMidi}, feedback {sendMidi}
 {
+	midiBehavior = 1;
+	smart_binds.resize(5);
 	fillHooks();//setupHooks()
 	setupStates();
 	setupGroups();

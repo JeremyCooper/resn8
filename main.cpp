@@ -24,10 +24,10 @@ using namespace std;
 #include "RtMidi.h"
 #include "testmodel.cpp"
 #include "feedbackClass.cpp"
+int midiBehavior;
 vector<pair<int,int>> currentGroupPage(10); //current page, last page
 map<pair<int, int>, int> groups;
 #include "apc80.cpp"
-
 #include "mapping.cpp"
 
 midimap mapping;
@@ -74,18 +74,48 @@ int main()
 
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
-	tchan = 0;
-	tnote = 0;
-	opGroup = groups[{channel, note}];
-	tpage = currentGroupPage[opGroup].first;
-	tvalue = 0;
-
-	if (controller.states["ignoreMidi"] == 0)
+	vector<pair<int, int>> sends = {
+		{ 0, 0 },
+		{ 0, 1 },
+		{ 0, 2 },
+		{ 0, 3 },
+		{ 0, 3 }
+	};
+	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
+		tchan = sends[i].first;
+		tnote = sends[i].second;
+		opGroup = groups[{tchan, tnote}];
+		tpage = currentGroupPage[opGroup].first;
+		tvalue = 0;
 		auto op = mapping[tpage][tchan][tnote];
-		int returnVal = (controller.*op.ptr)(tvalue, op.params);
-		cout << "Return code: " << returnVal << endl;
-		return returnVal;
+	
+		if (midiBehavior == 1)
+		{
+			(controller.*op.ptr)(tvalue, op.params);
+			//cout << "Return code: " << returnVal << endl;
+		} else if (midiBehavior == 2) {
+			if (op.name == "smartBind") //exit bind mode
+				controller.smartBind(tvalue, vector<int> { 0, 0 });
+			else if (op.name == "ascending")
+				controller.smartBind(tvalue, vector<int> { 2, 0 });
+			else if (op.name == "descending")
+				controller.smartBind(tvalue, vector<int> { 2, 1 });
+			else if (op.name == "blink")
+				controller.smartBind(tvalue, vector<int> { 2, 2 });
+		} else if (midiBehavior == 3) {
+			vector<string> invalids = {
+				"smartBind", "ascending", "descending", "blink"
+			};
+			for (const auto& i : invalids)
+				if (op.name == i)
+					return 60;
+			controller.addOperation(op.ptr, op.params);
+			controller.smartBind(tvalue, vector<int> { 3 });
+		} else if (midiBehavior == 4) {
+			if (op.name == "bindSlot")
+				controller.smartBind(tvalue, vector<int> { 4, op.params[0]});
+		}
 	}
 	return 0;
 #endif
@@ -111,4 +141,5 @@ int main()
  * 99: Mapping not found
  * 85: Out of bounds
  * 80: MIDI controller not found
- * 70: Invalid char for send function */
+ * 70: Invalid char for send function
+ * 60: Invalid smartBind input*/

@@ -5,6 +5,9 @@ class APC80
 public:
 	APC80(int (*sendMidi) (Reference, int));
 	//Mappable functions//
+	int test(int, vector<int>);
+	int bindSlot(int, vector<int>);
+	int smartBind(int, vector<int>);
 	int ignoreMidi(int, vector<int>);
 	int resetLayer(int, vector<int>);
 	int changeGroupPage(int, vector<int>);
@@ -18,7 +21,9 @@ public:
 	int green_bg(int, vector<int>);
 	int blue_bg(int, vector<int>);
 	//////////////////////
+	typedef int (APC80::*Ptr) (int, vector<int>);
 	int send(string, int);
+	void addOperation(Ptr, vector<int>);
 	void updateFeedback(vector<string>&, string);
 	void updateFeedback(vector<string>, map<string, int>&);
 	void setupStates();
@@ -26,7 +31,6 @@ public:
 	void setupPageDisplayValues();
 	void setupFeedback();
 	void fillHooks();
-	typedef int (APC80::*Ptr) (int, vector<int>);
 	Ptr returnPointer(string operation_name);
 	//Wreorder made me do it!
 	map<string, int> states;
@@ -38,4 +42,6 @@ private:
 	Feedback feedback;
 	map<string, Ptr> hooks;
 	map<string, Reference> dict;
+	vector<pair<Ptr, vector<int>>> operation_stack;
+	vector<tuple<Ptr, vector<int>, int>> smart_binds;
 };
