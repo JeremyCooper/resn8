@@ -1,12 +1,16 @@
 //apc80.cpp
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
 #include "apc80.h"
+#include "../Utilities/animation.cpp"
+#include "../Utilities/threads.cpp"
 using namespace std;
 void APC80::fillHooks()
 {
 	hooks["test"] = &APC80::test;
-	hooks["bindSlot"] = &APC80::bindSlot;
+	hooks["smartBindSlot"] = &APC80::smartBindSlot;
 	hooks["smartBind"] = &APC80::smartBind;
 	hooks["ignoreMidi"] = &APC80::ignoreMidi;
 	hooks["resetLayer"] = &APC80::resetLayer;
@@ -55,17 +59,30 @@ void APC80::fillHooks()
 	 execution stack creation?"
 	 We can use these buttons as UI for the creation step.
  */
+//////////////////////////////////////////
+//Misc notes//////////////////////////////
+/*
+   * Function that parses midi notes not used in model. For use with
+     mapping straight through to preserve some plasticity
+ */
 int APC80::test(int value, vector<int> args)
 {
-	cout << "testing... 1... 2... 3..." << endl;
 	return 0;
 }
-int APC80::bindSlot(int value, vector<int> args)
+int APC80::smartBindSlot(int value, vector<int> args)
 {
+	if (active_binds[args[0]] == false)
+		return 50;
 	tuple<Ptr, vector<int>, int> boundOp = smart_binds[args[0]];
 	Ptr bindPtr = get<0>(boundOp);
-	(this->*bindPtr)(value, get<1>(boundOp)); 
-	cout << "Animation: " << get<2>(boundOp) << endl;
+
+	pair<int, vector<int>> m = animation(
+		get<2>(boundOp), states["mpb"], 1);
+
+	AnimationThread<int (APC80::*)(int, vector<int>), APC80 *>
+			thread_anim(bindPtr, this, m, &anim_threads[args[0]]);
+
+	thread_anim();
 	return 0;
 }
 int APC80::smartBind(int value, vector<int> args)
@@ -86,6 +103,7 @@ int APC80::smartBind(int value, vector<int> args)
 		cout << "stage 4" << endl;
 		smart_binds[args[1]] = {
 			operation_stack[0].first, operation_stack[0].second, states["smartBindAnim"] }; 
+		active_binds[args[1]] = true;
 		operation_stack.clear();
 		states["smartBindAnim"] = 0;
 		midiBehavior = 1;
@@ -188,7 +206,6 @@ int APC80::red(int value, vector<int> args)
 }
 int APC80::green(int value, vector<int> args)
 {
-	cout << "green" << endl;
 	return send("g", value);
 }
 int APC80::blue(int value, vector<int> args)
@@ -233,7 +250,6 @@ void APC80::updateFeedback(vector<string> elements, map<string, int>& values)
 		feedback(i, values[i]);
 	}
 }
-//updateFeedback(group_members[targetGroup], pageDisplayValues[newPage]);
 void APC80::updateFeedback(vector<string>& elements, string layer)
 {
 	for (auto const& i : elements)
@@ -253,6 +269,7 @@ void APC80::updateFeedback(vector<string>& elements, string layer)
 }
 void APC80::setupStates()
 {
+	states["mpb"] = 470;
 	states["smartBindAnim"] = 0;
 	states["currentSCP"] = 0;
 	states["numberSCP"] = 3;
@@ -307,10 +324,14 @@ int APC80::send(string element, int value)
 	}
 	return 0;
 }
+//int APC80::executeAnimation(vector<
+//constructor
 APC80::APC80(int (*sendMidi) (Reference, int)) :
 	sendMidi(sendMidi), model {sendMidi}, feedback {sendMidi}
 {
 	midiBehavior = 1;
+	active_binds.resize(10);//smart_binds and execution stacks
+	anim_threads.resize(10);
 	smart_binds.resize(5);
 	fillHooks();//setupHooks()
 	setupStates();

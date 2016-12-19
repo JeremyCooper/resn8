@@ -3,17 +3,26 @@
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/erase.hpp>
-#include "operation.h"
 using namespace std;
+
+struct Operation
+{
+	Operation() {};
+	Operation(string name, Controller::Ptr ptr, vector<int> params) :
+		name(name), ptr(ptr), params(params) {}
+	string name;
+	Controller::Ptr ptr;
+	vector<int> params;
+};
 
 typedef vector<map<int, map<int, Operation>>> midimap;
 
-midimap parse_mapping(APC80 * controller)
+midimap parse_mapping(Controller * controller)
 {
 	midimap mapping;
 	mapping.resize(4); //number of pages
 
-	ifstream mapFileIn {"mapping.txt", ios::in };
+	ifstream mapFileIn {"config.txt", ios::in };
 	string readLine;
 
 	int currentGroup = 0;
@@ -107,7 +116,7 @@ midimap parse_mapping(APC80 * controller)
 		cout << "Group: (" << groups[{channel, note}] << ")" << endl;
 #endif
 
-		APC80::Ptr apcptr = controller->returnPointer(operation);
+		Controller::Ptr apcptr = controller->returnPointer(operation);
 		mapping[page][channel][note] = Operation {operation, apcptr, params};
 	}
 	return mapping;

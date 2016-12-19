@@ -6,7 +6,7 @@ public:
 	APC80(int (*sendMidi) (Reference, int));
 	//Mappable functions//
 	int test(int, vector<int>);
-	int bindSlot(int, vector<int>);
+	int smartBindSlot(int, vector<int>);
 	int smartBind(int, vector<int>);
 	int ignoreMidi(int, vector<int>);
 	int resetLayer(int, vector<int>);
@@ -40,6 +40,8 @@ private:
 	int (*sendMidi) (Reference, int);
 	Test model;
 	Feedback feedback;
+	vector<bool> active_binds;
+	vector<pair<bool, bool>> anim_threads;
 	map<string, Ptr> hooks;
 	map<string, Reference> dict;
 	vector<pair<Ptr, vector<int>>> operation_stack;

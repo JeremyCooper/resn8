@@ -2,6 +2,7 @@
 //By: Jeremy Cooper
 
 /* TODO:
+ * Thread manager and animations, currently for use with smart binds
  * Implement midiout
  * Create seperate header file(s) containing utilities
  * Use typedef to declare controller
@@ -11,10 +12,8 @@
  */
 
 //d_midi, d_route, d_parser
-//apc80, james
 //FIXME TODO FIXME TODO FIXME TODO
 #define d_route
-#define jeremy
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -22,12 +21,16 @@
 #include <map>
 using namespace std;
 #include "RtMidi.h"
-#include "testmodel.cpp"
-#include "feedbackClass.cpp"
+#include "Models/testmodel.cpp"
+#include "Models/feedbackClass.cpp"
 int midiBehavior;
 vector<pair<int,int>> currentGroupPage(10); //current page, last page
 map<pair<int, int>, int> groups;
-#include "apc80.cpp"
+#include "Controllers/apc80.cpp"
+//:::::::::::::::::::::::::::
+typedef APC80 Controller;
+//typedef JAMESCONTROLLERCLASS Controller;
+//:::::::::::::::::::::::::::
 #include "mapping.cpp"
 
 midimap mapping;
@@ -39,14 +42,7 @@ int sendMidi(Reference _ref, int value)
 	return 0;
 }
 
-//:::::::::::::::::::::::::::
-#ifdef jeremy
-APC80 controller {&sendMidi};
-#endif
-#ifdef james
-//james controller here
-#endif
-//:::::::::::::::::::::::::::
+Controller controller {&sendMidi};
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
@@ -88,6 +84,7 @@ int main()
 		opGroup = groups[{tchan, tnote}];
 		tpage = currentGroupPage[opGroup].first;
 		tvalue = 0;
+		//ControllerPointer
 		auto op = mapping[tpage][tchan][tnote];
 	
 		if (midiBehavior == 1)
@@ -113,10 +110,11 @@ int main()
 			controller.addOperation(op.ptr, op.params);
 			controller.smartBind(tvalue, vector<int> { 3 });
 		} else if (midiBehavior == 4) {
-			if (op.name == "bindSlot")
+			if (op.name == "smartBindSlot")
 				controller.smartBind(tvalue, vector<int> { 4, op.params[0]});
 		}
 	}
+	cin.get();
 	return 0;
 #endif
 
@@ -142,4 +140,6 @@ int main()
  * 85: Out of bounds
  * 80: MIDI controller not found
  * 70: Invalid char for send function
- * 60: Invalid smartBind input*/
+ * 60: Invalid smartBind input
+ * 50: Inactive bind activated
+ */

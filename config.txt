@@ -1,7 +1,7 @@
 0, 0, 0, smartBind(1)
 0, 0, 1, ascending()
-0, 0, 2, test()
-0, 0, 3, bindSlot(0)
+0, 0, 2, red(100)
+0, 0, 3, smartBindSlot(0)
 0, 144, 0, smartBind(1, 0)
 1, 1, 0, changeGroupPage(0, 1, 0) 
 #group 1
