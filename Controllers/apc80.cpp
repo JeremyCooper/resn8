@@ -98,7 +98,7 @@ int APC80::smartBind(int value, vector<int> args)
 		midiBehavior = 3;
 	} else if (stage == 3) {
 		cout << "stage 3" << endl;
-		midiBehavior = 4; //ready to bind, select slot
+		midiBehavior = 4;
 	} else if (stage == 4) {
 		cout << "stage 4" << endl;
 		smart_binds[args[1]] = {
@@ -113,7 +113,6 @@ int APC80::smartBind(int value, vector<int> args)
 		states["smartBindAnim"] = 0;
 		midiBehavior = 1;
 	}
-	//populate vector with functions activated during hold.
 	return 0;
 }
 int APC80::changeGroupPage(int value, vector<int> args)
@@ -324,8 +323,6 @@ int APC80::send(string element, int value)
 	}
 	return 0;
 }
-//int APC80::executeAnimation(vector<
-//constructor
 APC80::APC80(int (*sendMidi) (Reference, int)) :
 	sendMidi(sendMidi), model {sendMidi}, feedback {sendMidi}
 {

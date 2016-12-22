@@ -10,7 +10,7 @@ struct Reference
 class Test
 {
 public:
-	Test(int (*sendMidi) (Reference, int));
+	Test(int (*) (Reference, int));
 	void fillDictionary();
 	int operator()(string, int);
 	map<string, Reference> dict;

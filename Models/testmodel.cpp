@@ -9,6 +9,9 @@ void Test::fillDictionary()
 	dict["r1"] = { 145, 0, 150 };
 	dict["g1"] = { 145, 1, 150 };
 	dict["b1"] = { 145, 2, 150 };
+	dict["r2"] = { 146, 0, 300 };
+	dict["g2"] = { 146, 1, 300 };
+	dict["b2"] = { 146, 2, 300 };
 }
 Test::Test(int (*sendMidi) (Reference, int)) : sendMidi(sendMidi)
 {

@@ -6,11 +6,20 @@ template <typename T, typename O>
 class AnimationThread
 {
 public:
-	AnimationThread(T ptr, O obj, pair<int, vector<int>> m, pair<bool, bool> * peers) :
-		ptr(ptr), obj(obj), m(m), peers(peers) {}
+	AnimationThread(T ptr, O obj, pair<int, vector<int>> m, int * current_thread) :
+		ptr(ptr), obj(obj), m(m), current_thread(current_thread)
+	{
+		if (*current_thread > 50) //FIXME
+		{	
+			thread_id = 0;
+		} else {
+			thread_id = *current_thread+1;
+		}
+		cout << "========================================" << endl << "current thread: " << thread_id << endl;
+	}
 	int operator()()
 	{
-		cout << m.second.size() << endl;
+		*current_thread = thread_id;
 		thread t(&AnimationThread::run_thread, *this);
 		t.detach();
 		return 0;
@@ -19,7 +28,7 @@ public:
 	{
 		for (const auto& i : m.second)
 		{
-			if (peers.first == true)
+			if (*current_thread != thread_id)
 				break;
 			(obj->*ptr)(i, vector<int> {0});
 			this_thread::sleep_for(chrono::milliseconds(m.first));
@@ -29,5 +38,6 @@ private:
 	T ptr;
 	O obj;
 	pair<int, vector<int>> m;
-	pair<bool, bool> * peers;
+	int thread_id;
+	int * current_thread;
 };

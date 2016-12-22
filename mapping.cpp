@@ -116,8 +116,8 @@ midimap parse_mapping(Controller * controller)
 		cout << "Group: (" << groups[{channel, note}] << ")" << endl;
 #endif
 
-		Controller::Ptr apcptr = controller->returnPointer(operation);
-		mapping[page][channel][note] = Operation {operation, apcptr, params};
+		Controller::Ptr controllerptr = controller->returnPointer(operation);
+		mapping[page][channel][note] = Operation {operation, controllerptr, params};
 	}
 	return mapping;
 }

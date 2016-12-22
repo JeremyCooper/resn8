@@ -41,7 +41,7 @@ private:
 	Test model;
 	Feedback feedback;
 	vector<bool> active_binds;
-	vector<pair<bool, bool>> anim_threads;
+	vector<int> anim_threads;
 	map<string, Ptr> hooks;
 	map<string, Reference> dict;
 	vector<pair<Ptr, vector<int>>> operation_stack;

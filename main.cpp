@@ -3,6 +3,7 @@
 
 /* TODO:
  * Thread manager and animations, currently for use with smart binds
+ * Should smartBinds have absolute bind option?
  * Implement midiout
  * Create seperate header file(s) containing utilities
  * Use typedef to declare controller
@@ -74,6 +75,8 @@ int main()
 		{ 0, 0 },
 		{ 0, 1 },
 		{ 0, 2 },
+		{ 0, 3 },
+		{ 0, 3 },
 		{ 0, 3 },
 		{ 0, 3 }
 	};
