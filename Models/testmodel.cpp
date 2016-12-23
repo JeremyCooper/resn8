@@ -13,12 +13,13 @@ void Test::fillDictionary()
 	dict["g2"] = { 146, 1, 300 };
 	dict["b2"] = { 146, 2, 300 };
 }
-Test::Test(int (*sendMidi) (Reference, int)) : sendMidi(sendMidi)
+Test::Test(SendMidi * sendmidi) : sendmidi(sendmidi)
 {
 	fillDictionary();
 }
 int Test::operator()(string element, int value)
 {
 	dict[element].value = value;
-	return sendMidi(dict[element], value);
+	sendmidi->send(dict[element], value);
+	return 0;
 }

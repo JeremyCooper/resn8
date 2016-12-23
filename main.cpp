@@ -22,6 +22,31 @@
 #include <map>
 using namespace std;
 #include "RtMidi.h"
+struct Reference
+{
+	Reference() {}
+	Reference(int channel, int note, int value) :
+		channel(channel), note(note), value(value) {}
+	int channel, note, value;
+};
+class SendMidi
+{
+public:
+	SendMidi(RtMidiOut * midiout) : midiout(midiout) {}
+	void send(Reference _ref, int value)
+	{
+		vector<unsigned char> message;
+		message.push_back(192);
+		message.push_back(7);
+		message.push_back(90);
+#ifndef d_route
+		midiout->sendMessage( &message );
+#endif
+		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
+	}
+private:
+	RtMidiOut * midiout;
+};
 #include "Models/testmodel.cpp"
 #include "Models/feedbackClass.cpp"
 int midiBehavior;
@@ -37,13 +62,10 @@ typedef APC80 Controller;
 midimap mapping;
 int channel, note, opGroup, page, value;
 
-int sendMidi(Reference _ref, int value)
-{
-	cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
-	return 0;
-}
-
-Controller controller {&sendMidi};
+RtMidiIn *midiin = new RtMidiIn();
+RtMidiOut *midiout = new RtMidiOut();
+SendMidi sendmidi {midiout};
+Controller controller {&sendmidi};
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
@@ -66,7 +88,6 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 
 int main()
 {
-	RtMidiIn *midiin = new RtMidiIn();
 	mapping = parse_mapping(&controller);
 
 #ifdef d_route
@@ -123,12 +144,20 @@ int main()
 
 	//prevent opening a port if correct controller isn't found
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
+	{
 		if (midiin->getPortName(i) == "APC40 mkII")
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);
-			return 80;
 		}
+	}
+	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
+	{
+		if (midiout->getPortName(i) == "resn8")
+		{
+			midiout->openPort(i);
+		}
+	}
 
 	//CLI options will go here
 

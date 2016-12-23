@@ -3,7 +3,7 @@ using namespace std;
 class APC80
 {
 public:
-	APC80(int (*sendMidi) (Reference, int));
+	APC80(SendMidi *);
 	//Mappable functions//
 	int test(int, vector<int>);
 	int smartBindSlot(int, vector<int>);
@@ -37,7 +37,7 @@ public:
 	vector<map<string, int>> pageDisplayValues;
 	vector<vector<string>> group_members;
 private:
-	int (*sendMidi) (Reference, int);
+	SendMidi * sendmidi;
 	Test model;
 	Feedback feedback;
 	vector<bool> active_binds;

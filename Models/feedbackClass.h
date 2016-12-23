@@ -9,10 +9,10 @@ struct savedClipViewStruct
 class Feedback
 {
 public:
-	Feedback(int (*sendMidi) (Reference, int));
+	Feedback(SendMidi *);
 	void fillDictionary();
 	int operator()(string, int);
 	map<string, Reference> dict;
 private:
-	int (*sendMidi) (Reference, int);
+	SendMidi * sendmidi;
 };

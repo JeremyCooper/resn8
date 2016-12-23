@@ -16,12 +16,13 @@ void Feedback::fillDictionary()
 	dict["1x1"] = { 1, 1, 300 };
 	dict["1x2"] = { 1, 2, 300 };
 }
-Feedback::Feedback(int (*sendMidi) (Reference, int)) : sendMidi(sendMidi)
+Feedback::Feedback(SendMidi * sendmidi) : sendmidi(sendmidi)
 {
 	fillDictionary();
 }
 int Feedback::operator()(string element, int value)
 {
 	dict[element].value = value;
-	return sendMidi(dict[element], value);
+	sendmidi->send(dict[element], value);
+	return 0;
 }
