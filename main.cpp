@@ -83,7 +83,33 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 		cout << "stamp = " << deltatime << endl;
 #endif
 	auto op = mapping[page][channel][note];
-	cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
+	if (midiBehavior == 1)
+	{
+		(controller.*op.ptr)(value, op.params);
+		//cout << "Return code: " << returnVal << endl;
+	} else if (midiBehavior == 2) {
+		if (op.name == "smartBind") //exit bind mode
+			controller.smartBind(value, vector<int> { 0, 0 });
+		else if (op.name == "ascending")
+			controller.smartBind(value, vector<int> { 2, 0 });
+		else if (op.name == "descending")
+			controller.smartBind(value, vector<int> { 2, 1 });
+		else if (op.name == "blink")
+			controller.smartBind(value, vector<int> { 2, 2 });
+	} else if (midiBehavior == 3) {
+		vector<string> invalids = {
+			"smartBind", "ascending", "descending", "blink"
+		};
+		for (const auto& i : invalids)
+			if (op.name == i)
+				return;
+		controller.addOperation(op.ptr, op.params);
+		controller.smartBind(value, vector<int> { 3 });
+	} else if (midiBehavior == 4) {
+		if (op.name == "smartBindSlot")
+			controller.smartBind(value, vector<int> { 4, op.params[0]});
+	}
+	//cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
 int main()
@@ -172,6 +198,6 @@ int main()
  * 85: Out of bounds
  * 80: MIDI controller not found
  * 70: Invalid char for send function
- * 60: Invalid smartBind input
+ * 60: Invalid smartBind )input
  * 50: Inactive bind activated
  */
