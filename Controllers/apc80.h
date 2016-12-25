@@ -37,7 +37,7 @@ public:
 	vector<map<string, int>> pageDisplayValues;
 	vector<vector<string>> group_members;
 private:
-	SendMidi * sendmidi;
+	//SendMidi * sendmidi;
 	Test model;
 	Feedback feedback;
 	vector<bool> active_binds;

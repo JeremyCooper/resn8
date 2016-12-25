@@ -14,7 +14,7 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-#define d_route
+//#define d_midi
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -35,12 +35,15 @@ public:
 	SendMidi(RtMidiOut * midiout) : midiout(midiout) {}
 	void send(Reference _ref, int value)
 	{
-		vector<unsigned char> message;
-		message.push_back(192);
-		message.push_back(7);
-		message.push_back(90);
+		//cout << _ref.channel << ", " << _ref.note << ", " << value << endl;
+		vector<unsigned char> out_message;
+		out_message.push_back(_ref.channel);
+		out_message.push_back(_ref.note);
+		out_message.push_back(value);
+		for (unsigned int i=0; i!=out_message.size(); ++i)
+			out_message[i] += 0;
 #ifndef d_route
-		midiout->sendMessage( &message );
+		midiout->sendMessage( &out_message );
 #endif
 		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
 	}
@@ -59,13 +62,13 @@ typedef APC80 Controller;
 //:::::::::::::::::::::::::::
 #include "mapping.cpp"
 
-midimap mapping;
 int channel, note, opGroup, page, value;
 
 RtMidiIn *midiin = new RtMidiIn();
 RtMidiOut *midiout = new RtMidiOut();
 SendMidi sendmidi {midiout};
 Controller controller {&sendmidi};
+midimap mapping = parse_mapping(&controller);
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
@@ -77,12 +80,14 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	
 #ifdef d_midi
 	unsigned int nBytes = message->size();
-	for (unsigned int i=0; i!=nBytes; ++i)
+	for (unsigned int i=0; i!=nBytes-1; ++i)
 		cout << "Byte " << i << " = " << (int)message->at(i) << ", ";
 	if (nBytes > 0)
 		cout << "stamp = " << deltatime << endl;
 #endif
 	auto op = mapping[page][channel][note];
+	if (op.name == "")
+		return;
 	if (midiBehavior == 1)
 	{
 		(controller.*op.ptr)(value, op.params);
@@ -114,8 +119,6 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 
 int main()
 {
-	mapping = parse_mapping(&controller);
-
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
@@ -184,6 +187,7 @@ int main()
 			midiout->openPort(i);
 		}
 	}
+	midiout->openVirtualPort("resn8");
 
 	//CLI options will go here
 

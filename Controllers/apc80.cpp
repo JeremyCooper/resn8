@@ -324,7 +324,7 @@ int APC80::send(string element, int value)
 	return 0;
 }
 APC80::APC80(SendMidi * sendmidi) :
-	sendmidi(sendmidi), model {sendmidi}, feedback {sendmidi}
+	model {sendmidi}, feedback {sendmidi}
 {
 	midiBehavior = 1;
 	active_binds.resize(10);//smart_binds and execution stacks
