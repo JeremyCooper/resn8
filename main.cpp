@@ -21,7 +21,7 @@
 #include <vector>
 #include <map>
 using namespace std;
-#include "RtMidi.h"
+//#include "RtMidi.h"
 struct Reference
 {
 	Reference() {}
