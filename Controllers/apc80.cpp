@@ -12,6 +12,7 @@ void APC80::fillHooks()
 	hooks["test"] = &APC80::test;
 	hooks["smartBindSlot"] = &APC80::smartBindSlot;
 	hooks["smartBind"] = &APC80::smartBind;
+	hooks["exStack"] = &APC80::exStack;
 	hooks["ignoreMidi"] = &APC80::ignoreMidi;
 	hooks["resetLayer"] = &APC80::resetLayer;
 	hooks["changeLayer"] = &APC80::changeLayer;
@@ -74,14 +75,17 @@ int APC80::smartBindSlot(int value, vector<int> args)
 	if (active_binds[args[0]] == false)
 		return 50;
 	tuple<Ptr, vector<int>, int> boundOp = smart_binds[args[0]];
-	Ptr bindPtr = get<0>(boundOp);
+	Ptr boundPtr = get<0>(boundOp);
+
+	vector<int> params = get<1>(boundOp);
 
 	pair<int, vector<int>> m = animation(
 		get<2>(boundOp), states["mpb"], 1);
 
 	AnimationThread<int (APC80::*)(int, vector<int>), APC80 *>
-			thread_anim(bindPtr, this, m, &anim_threads[args[0]]);
+			thread_anim(boundPtr, this, m, &anim_threads[args[0]], params);
 
+	//get<1>(boundOp)?????
 	thread_anim();
 	return 0;
 }
@@ -91,13 +95,15 @@ int APC80::smartBind(int value, vector<int> args)
 	if (stage == 1) //smart bind mode activated
 	{
 		cout << "stage 1" << endl;
+		bindMode = "smartBind";
 		midiBehavior = 2;
 	} else if (stage == 2) {
 		cout << "stage 2" << endl;
-		states["smartBindAnim"] = args[1];
 		midiBehavior = 3;
+		//changeGroup
 	} else if (stage == 3) {
 		cout << "stage 3" << endl;
+		states["smartBindAnim"] = args[1];
 		midiBehavior = 4;
 	} else if (stage == 4) {
 		cout << "stage 4" << endl;
@@ -111,7 +117,52 @@ int APC80::smartBind(int value, vector<int> args)
 		cout << "stage 0 (exit prematurely)" << endl;
 		operation_stack.clear();
 		states["smartBindAnim"] = 0;
+		bindMode = "None";
 		midiBehavior = 1;
+	}
+	return 0;
+}
+int APC80::exStack(int value, vector<int> args)
+{
+	int stage = args[0];
+	if (stage == 1)
+	{
+		cout << "stage 1" << endl;
+		if (active_binds[args[1]] == true)
+		{
+			cout << "activating execution stack" << endl;
+			vector<tuple<Ptr, vector<int>, int>> boundOpStack = execution_stacks[args[1]];
+			for (unsigned int i=0; i!=boundOpStack.size(); ++i)
+			{
+				tuple<Ptr, vector<int>, int> boundOp = boundOpStack[i];
+				Ptr boundPtr = get<0>(boundOp);
+				vector<int> params = get<1>(boundOp);
+				int value = get<2>(boundOp);
+				thread t(boundPtr, this, value, params);
+				t.detach();	
+			}
+		} else {
+			bindMode = "exStack";
+			states["exStackSlot"] = args[1];
+			midiBehavior = 2;
+		}
+	} else if (stage == 2) {
+		cout << "stage 2" << endl;
+		midiBehavior = 3;
+	} else if (stage == 3) {
+		cout << "stage 3" << endl;
+		unsigned int i = operation_stack.size()-1;
+		execution_stacks[states["exStackSlot"]].push_back({operation_stack[i].first, operation_stack[i].second, args[1]});
+		active_binds[states["exStackSlot"]] = true;
+		//go back to grab more commands
+		midiBehavior = 2;
+	} else if (stage == 4) {
+		cout << "stage 4" << endl;
+		operation_stack.clear();
+		bindMode = "None";
+		states["exStackSlot"] = 0;
+		midiBehavior = 1;
+	} else if (stage == 0) {
 	}
 	return 0;
 }
@@ -330,6 +381,7 @@ APC80::APC80(SendMidi * sendmidi) :
 	active_binds.resize(10);//smart_binds and execution stacks
 	anim_threads.resize(10);
 	smart_binds.resize(5);
+	execution_stacks.resize(5);
 	fillHooks();//setupHooks()
 	setupStates();
 	setupGroups();

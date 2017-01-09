@@ -6,8 +6,8 @@ template <typename T, typename O>
 class AnimationThread
 {
 public:
-	AnimationThread(T ptr, O obj, pair<int, vector<int>> m, int * current_thread) :
-		ptr(ptr), obj(obj), m(m), current_thread(current_thread)
+	AnimationThread(T ptr, O obj, pair<int, vector<int>> m, int * current_thread, vector<int> params) :
+		ptr(ptr), obj(obj), m(m), current_thread(current_thread), params(params)
 	{
 		if (*current_thread > 50) //FIXME
 		{	
@@ -30,7 +30,7 @@ public:
 		{
 			if (*current_thread != thread_id)
 				break;
-			(obj->*ptr)(i, vector<int> {0});
+			(obj->*ptr)(i, params);
 			this_thread::sleep_for(chrono::milliseconds(m.first));
 		}
 	}
@@ -40,4 +40,5 @@ private:
 	pair<int, vector<int>> m;
 	int thread_id;
 	int * current_thread;
+	vector<int> params;
 };

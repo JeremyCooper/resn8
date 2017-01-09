@@ -7,9 +7,13 @@ public:
 	//Mappable functions//
 	int test(int, vector<int>);
 	int smartBindSlot(int, vector<int>);
+	int exStackSlot(int, vector<int>);
+	//(stage, param)
 	int smartBind(int, vector<int>);
+	int exStack(int, vector<int>);
 	int ignoreMidi(int, vector<int>);
 	int resetLayer(int, vector<int>);
+	//(target group, new page, direction?)
 	int changeGroupPage(int, vector<int>);
 	int changeLayer(int, vector<int>);
 	int changeBackgroundLayer(int, vector<int>);
@@ -36,6 +40,7 @@ public:
 	map<string, int> states;
 	vector<map<string, int>> pageDisplayValues;
 	vector<vector<string>> group_members;
+	string bindMode;
 private:
 	//SendMidi * sendmidi;
 	Test model;
@@ -46,4 +51,5 @@ private:
 	map<string, Reference> dict;
 	vector<pair<Ptr, vector<int>>> operation_stack;
 	vector<tuple<Ptr, vector<int>, int>> smart_binds;
+	vector<vector<tuple<Ptr, vector<int>, int>>> execution_stacks;
 };

@@ -1,7 +1,9 @@
-//Artistic compatibility layer for Resolume Arena
+//Virtual Midi Controller
 //By: Jeremy Cooper
 
 /* TODO:
+ * Stage order for smartBinds and exStacks should be:
+     -initiate, select control, select param, select slot
  * Thread manager and animations, currently for use with smart binds
  * Should smartBinds have absolute bind option?
  * Implement midiout
@@ -9,19 +11,19 @@
  * Use typedef to declare controller
      -change controller object in one spot and done
  * Create functional testmodel and testcontroller
- * Midi input from attached software (midi input from multiple sources) 
+ * DMX out
  */
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-//#define d_midi
+#define d_route
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
 #include <vector>
 #include <map>
 using namespace std;
-//#include "RtMidi.h"
+#include "RtMidi.h"
 struct Reference
 {
 	Reference() {}
@@ -74,7 +76,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
 	channel = (int)message->at(0) - 128;
 	note = (int)message->at(1);
-	opGroup = groups[{channel, note}];
+	opGroup = groups[ {channel, note} ];
 	page = currentGroupPage[opGroup].first;
 	value = (int)message->at(2);
 	
@@ -122,13 +124,13 @@ int main()
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
-		{ 0, 0 },
-		{ 0, 1 },
-		{ 0, 2 },
-		{ 0, 3 },
-		{ 0, 3 },
-		{ 0, 3 },
-		{ 0, 3 }
+		{ 3, 0 },
+		{ 3, 1 },
+		{ 3, 2 },
+		{ 3, 3 },
+		{ 3, 4 },
+		{ 3, 0 },
+		{ 3, 0 }
 	};
 	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
@@ -145,26 +147,48 @@ int main()
 			(controller.*op.ptr)(tvalue, op.params);
 			//cout << "Return code: " << returnVal << endl;
 		} else if (midiBehavior == 2) {
-			if (op.name == "smartBind") //exit bind mode
-				controller.smartBind(tvalue, vector<int> { 0, 0 });
-			else if (op.name == "ascending")
-				controller.smartBind(tvalue, vector<int> { 2, 0 });
-			else if (op.name == "descending")
-				controller.smartBind(tvalue, vector<int> { 2, 1 });
-			else if (op.name == "blink")
-				controller.smartBind(tvalue, vector<int> { 2, 2 });
-		} else if (midiBehavior == 3) {
 			vector<string> invalids = {
-				"smartBind", "ascending", "descending", "blink"
+				"ascending", "descending", "blink"
 			};
 			for (const auto& i : invalids)
 				if (op.name == i)
 					return 60;
+			//exit binder
+			if (op.name == "smartBind")
+			{
+				controller.smartBind(tvalue, vector<int> { 4 });
+			}
+			else if (op.name == "exStack")
+			{
+				cout << "hello" << endl;
+				controller.exStack(tvalue, vector<int> { 4 });
+			}
+
 			controller.addOperation(op.ptr, op.params);
-			controller.smartBind(tvalue, vector<int> { 3 });
+			if (controller.bindMode == "smartBind")
+				controller.smartBind(tvalue, vector<int> { 2 });
+			else if (controller.bindMode == "exStack")
+				controller.exStack(tvalue, vector<int> { 2 });
+		} else if (midiBehavior == 3) {
+			if (op.name == "smartBind") //exit bind mode
+				controller.smartBind(tvalue, vector<int> { 0, 0 }); //midibehavior, param
+			else if (op.name == "ascending")
+				controller.smartBind(tvalue, vector<int> { 3, 0 });
+			else if (op.name == "descending")
+				controller.smartBind(tvalue, vector<int> { 3, 1 });
+			else if (op.name == "blink")
+				controller.smartBind(tvalue, vector<int> { 3, 2 });
+			else if (op.name == "min")
+				controller.exStack(tvalue, vector<int> { 3, 0 });
+			else if (op.name == "mid")
+				controller.exStack(tvalue, vector<int> { 3, 64 });
+			else if (op.name == "max")
+				controller.exStack(tvalue, vector<int> { 3, 127 });
 		} else if (midiBehavior == 4) {
 			if (op.name == "smartBindSlot")
 				controller.smartBind(tvalue, vector<int> { 4, op.params[0]});
+			else if (op.name == "exStack")
+				controller.exStack(tvalue, vector<int> { 4, op.params[0]});
 		}
 	}
 	cin.get();
