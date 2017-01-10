@@ -228,4 +228,5 @@ int main()
  * 70: Invalid char for send function
  * 60: Invalid smartBind )input
  * 50: Inactive bind activated
+ * 40: Invalid playback control
  */

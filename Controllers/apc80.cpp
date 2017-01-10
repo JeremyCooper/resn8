@@ -24,6 +24,19 @@ void APC80::fillHooks()
 	hooks["red_bg"] = &APC80::red_bg;
 	hooks["green_bg"] = &APC80::green_bg;
 	hooks["blue_bg"] = &APC80::blue_bg;
+	//select layer, opacity, speed, playback controls, select clip, preview clip
+	hooks["selectLayer"] = &APC80::selectLayer;
+	hooks["selectLayer_bg"] = &APC80::selectLayer_bg;
+	hooks["opacity"] = &APC80::opacity;
+	hooks["opacity_bg"] = &APC80::opacity_bg;
+	hooks["speed"] = &APC80::speed;
+	hooks["speed_bg"] = &APC80::speed_bg;
+	hooks["playback"] = &APC80::playback;
+	hooks["playback_bg"] = &APC80::playback_bg;
+	hooks["selectClip"] = &APC80::selectClip;
+	hooks["selectClip_bg"] = &APC80::selectClip_bg;
+	hooks["previewClip"] = &APC80::previewClip;
+	hooks["previewClip_bg"] = &APC80::previewClip_bg;
 	hooks["changeCurrentSCP"] = &APC80::changeCurrentSCP; // SCP = Saved Clip Page
 }
 //modular with a purpose
@@ -273,6 +286,74 @@ int APC80::green_bg(int value, vector<int> args)
 int APC80::blue_bg(int value, vector<int> args)
 {
 	return send("b_bg", value);
+}
+int APC80::selectLayer(int value, vector<int> args)
+{
+	states["currentLayer"] = args[0];
+	return 0;
+}
+int APC80::selectLayer_bg(int value, vector<int> args)
+{
+	states["backgroundLayer"] = args[0];
+	return 0;
+}
+int APC80::opacity(int value, vector<int> args)
+{
+	return send("opacity", value);
+}
+int APC80::opacity_bg(int value, vector<int> args)
+{
+	return send("opacity_bg", value);
+}
+int APC80::speed(int value, vector<int> args)
+{
+	return send("speed", value);
+}
+int APC80::speed_bg(int value, vector<int> args)
+{
+	return send("speed_bg", value);
+}
+int APC80::playback(int value, vector<int> args)
+{
+	int control = args[0];
+	if (control == 0) {//reverse
+		return send("reverse", value);
+	} else if (control == 1) { //forward
+		return send("forward", value);
+	} else if (control == 2) { //random
+		return send("random", value);
+	} else if (control == 3) { //??pause
+	}
+	return 40;
+}
+int APC80::playback_bg(int value, vector<int> args)
+{
+	int control = args[0];
+	if (control == 0) {//reverse
+		return send("reverse_bg", value);
+	} else if (control == 1) { //forward
+		return send("forward_bg", value);
+	} else if (control == 2) { //random
+		return send("random_bg", value);
+	} else if (control == 3) { //??pause
+	}
+	return 40;
+}
+int APC80::selectClip(int value, vector<int> args)
+{
+	return 0;
+}
+int APC80::selectClip_bg(int value, vector<int> args)
+{
+	return 0;
+}
+int APC80::previewClip(int value, vector<int> args)
+{
+	return 0;
+}
+int APC80::previewClip_bg(int value, vector<int> args)
+{
+	return 0;
 }
 //////////////////////////////////////////
 void APC80::addOperation(Ptr operation, vector<int> args)

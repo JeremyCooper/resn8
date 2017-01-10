@@ -24,6 +24,18 @@ public:
 	int red_bg(int, vector<int>);
 	int green_bg(int, vector<int>);
 	int blue_bg(int, vector<int>);
+	int selectLayer(int, vector<int>);
+	int selectLayer_bg(int, vector<int>);
+	int opacity(int, vector<int>);
+	int opacity_bg(int, vector<int>);
+	int speed(int, vector<int>);
+	int speed_bg(int, vector<int>);
+	int playback(int, vector<int>);
+	int playback_bg(int, vector<int>);
+	int selectClip(int, vector<int>);
+	int selectClip_bg(int, vector<int>);
+	int previewClip(int, vector<int>);
+	int previewClip_bg(int, vector<int>);
 	//////////////////////
 	typedef int (APC80::*Ptr) (int, vector<int>);
 	int send(string, int);
