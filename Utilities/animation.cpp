@@ -3,7 +3,7 @@ pair<int, vector<int>> animation(int type, int  mpb, int bars)
 	int dur = bars * mpb;
 	vector<int> values;
 	float wait;
-	if (type == 0) // ascending
+	if (type == 0) //ascending
 	{
 		wait = dur / 127.0;
 		for (int i=0; i!=128; ++i)
@@ -12,7 +12,7 @@ pair<int, vector<int>> animation(int type, int  mpb, int bars)
 		}
 		pair<int, vector<int>> timing_messages = {wait, values};
 		return timing_messages;
-	} else if (type == 1) {
+	} else if (type == 1) { //descending
 		wait = dur / 127.0;
 		for (int i=127; i!=0; --i)
 		{

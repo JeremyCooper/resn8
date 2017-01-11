@@ -6,8 +6,7 @@ public:
 	APC80(SendMidi *);
 	//Mappable functions//
 	int test(int, vector<int>);
-	int smartBindSlot(int, vector<int>);
-	int exStackSlot(int, vector<int>);
+	int bpmSlot(int, vector<int>);
 	//(stage, param)
 	int smartBind(int, vector<int>);
 	int exStack(int, vector<int>);
