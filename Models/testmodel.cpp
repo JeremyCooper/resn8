@@ -13,7 +13,7 @@ void Test::fillDictionary()
 	dict["g2"] = { 146, 1, 300 };
 	dict["b2"] = { 146, 2, 300 };
 	dict["selectLayer0"] = { 144, 0, 0 };
-	dict["selectLayer1"] = { 144, 9, 0 };
+	dict["selectLayer1"] = { 144, 10, 0 };
 	dict["selectLayer2"] = { 144, 19, 0 };
 	dict["speed0"] = { 176, 0, 0 };
 	dict["speed1"] = { 176, 9, 0 };

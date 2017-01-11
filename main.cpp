@@ -16,7 +16,7 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-#define d_route
+//#define d_midi
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -74,7 +74,7 @@ midimap mapping = parse_mapping(&controller);
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
 {
-	channel = (int)message->at(0) - 128;
+	channel = (int)message->at(0);// - 128;
 	note = (int)message->at(1);
 	opGroup = groups[ {channel, note} ];
 	page = currentGroupPage[opGroup].first;
@@ -95,23 +95,38 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 		(controller.*op.ptr)(value, op.params);
 		//cout << "Return code: " << returnVal << endl;
 	} else if (midiBehavior == 2) {
-		if (op.name == "smartBind") //exit bind mode
-			controller.smartBind(value, vector<int> { 0, 0 });
-		else if (op.name == "ascending")
-			controller.smartBind(value, vector<int> { 2, 0 });
-		else if (op.name == "descending")
-			controller.smartBind(value, vector<int> { 2, 1 });
-		else if (op.name == "blink")
-			controller.smartBind(value, vector<int> { 2, 2 });
-	} else if (midiBehavior == 3) {
 		vector<string> invalids = {
-			"smartBind", "ascending", "descending", "blink"
+			"ascending", "descending", "blink"
 		};
 		for (const auto& i : invalids)
 			if (op.name == i)
 				return;
+		//exit binder
+		if (op.name == "smartBind")
+			controller.smartBind(value, vector<int> { 4 });
+		else if (op.name == "exStack")
+			controller.exStack(value, vector<int> { 4 });
+
 		controller.addOperation(op.ptr, op.params);
-		controller.smartBind(value, vector<int> { 3 });
+		if (controller.bindMode == "smartBind")
+			controller.smartBind(value, vector<int> { 2 });
+		else if (controller.bindMode == "exStack")
+			controller.exStack(value, vector<int> { 2 });
+	} else if (midiBehavior == 3) {
+		if (op.name == "smartBind") //exit bind mode
+			controller.smartBind(value, vector<int> { 0, 0 }); //midibehavior, param
+		else if (op.name == "ascending")
+			controller.smartBind(value, vector<int> { 3, 0 });
+		else if (op.name == "descending")
+			controller.smartBind(value, vector<int> { 3, 1 });
+		else if (op.name == "blink")
+			controller.smartBind(value, vector<int> { 3, 2 });
+		else if (op.name == "min")
+			controller.exStack(value, vector<int> { 3, 0 });
+		else if (op.name == "mid")
+			controller.exStack(value, vector<int> { 3, 64 });
+		else if (op.name == "max")
+			controller.exStack(value, vector<int> { 3, 127 });
 	} else if (midiBehavior == 4) {
 		if (op.name == "smartBindSlot")
 			controller.smartBind(value, vector<int> { 4, op.params[0]});
@@ -155,14 +170,9 @@ int main()
 					return 60;
 			//exit binder
 			if (op.name == "smartBind")
-			{
 				controller.smartBind(tvalue, vector<int> { 4 });
-			}
 			else if (op.name == "exStack")
-			{
-				cout << "hello" << endl;
 				controller.exStack(tvalue, vector<int> { 4 });
-			}
 
 			controller.addOperation(op.ptr, op.params);
 			if (controller.bindMode == "smartBind")

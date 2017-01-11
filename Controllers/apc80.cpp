@@ -290,7 +290,7 @@ int APC80::blue_bg(int value, vector<int> args)
 int APC80::selectLayer(int value, vector<int> args)
 {
 	states["currentLayer"] = args[0];
-	return 0;
+	return send("selectLayer", value);
 }
 int APC80::selectLayer_bg(int value, vector<int> args)
 {
