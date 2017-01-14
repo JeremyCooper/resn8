@@ -2,6 +2,7 @@
 //By: Jeremy Cooper
 
 /* TODO:
+ * Redo binders to store data in "Bind" objects
  * BPM manager
  * Copy actions upon bind, freeing origin bind
  * Clear smartBind, exStack functionality
@@ -94,7 +95,8 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	} else if (midiBehavior == 2) {
 		//grab control element
 		vector<string> invalids = {
-			"ascending", "descending", "blink"
+			"ascending", "descending", "blink",
+			"min", "mid", "max"
 		};
 		for (const auto& i : invalids)
 			if (op.name == i)
@@ -132,7 +134,6 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 		if (op.name == "smartBindSlot")
 			controller.smartBind(value, vector<int> { 4, op.params[0]});
 	}
-	//cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
 int main()
@@ -162,7 +163,8 @@ int main()
 			//cout << "Return code: " << returnVal << endl;
 		} else if (midiBehavior == 2) {
 			vector<string> invalids = {
-				"ascending", "descending", "blink"
+				"ascending", "descending", "blink",
+				"min", "mid", "max"
 			};
 			for (const auto& i : invalids)
 				if (op.name == i)

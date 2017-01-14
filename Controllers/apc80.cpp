@@ -10,6 +10,7 @@ using namespace std;
 void APC80::fillHooks()
 {
 	hooks["test"] = &APC80::test;
+	hooks["bpmTap"] = &APC80::bpmTap;
 	hooks["bpmSlot"] = &APC80::bpmSlot;
 	hooks["smartBind"] = &APC80::smartBind;
 	hooks["exStack"] = &APC80::exStack;
@@ -43,7 +44,7 @@ void APC80::fillHooks()
 //////////////////////////////////////////
 //BINDER NOTES:///////////////////////////
 /*
-   //Animations:
+   * Animations:
 	 Ascending, Descending, Strobe
 	 Animations are handled by thread-manager. Old instance is killed
 	 as soon as new instance begins. Full overwrite, no layering.
@@ -57,10 +58,11 @@ void APC80::fillHooks()
      or smartBinds should copy the behavior so that the original origin
 	 bind is free to be re-assigned.
 
-	 "What are some controls that will NOT be needed during animation and
-	 execution stack creation?"
-	 We can use these buttons as UI for the creation step.
+   * What are some controls that will NOT be needed during animation and
+	 execution stack creation? these can be used as UI buttons for the
+	 creation step.
 */
+
 //////////////////////////////////////////
 //MISC NOTES//////////////////////////////
 /*
@@ -68,6 +70,10 @@ void APC80::fillHooks()
      mapping straight through to preserve some plasticity
 */
 int APC80::test(int value, vector<int> args)
+{
+	return 0;
+}
+int APC80::bpmTap(int value, vector<int> args)
 {
 	return 0;
 }
@@ -165,12 +171,7 @@ int APC80::exStack(int value, vector<int> args)
 int APC80::changeGroupPage(int value, vector<int> args)
 {
 	int targetGroup = args[0];
-	int currentPage = currentGroupPage[targetGroup].first;
-	int newPage = currentPage;
-	if (args[1] == 0)
-	{
-		int lastPage = currentGroupPage[targetGroup].second;
-		int direction = args[2];
+	int currentPage = currentGroupPage[targetGroup].first; int newPage = currentPage; if (args[1] == 0) { int lastPage = currentGroupPage[targetGroup].second; int direction = args[2];
 		if (direction == -1)
 		{
 			if (currentPage == 0)
@@ -339,6 +340,9 @@ int APC80::previewClip_bg(int value, vector<int> args)
 	return 0;
 }
 //////////////////////////////////////////
+void APC80::bpmManager()
+{
+}
 void APC80::addOperation(Ptr operation, vector<int> args)
 {
 	operation_stack.push_back( { operation, args } );
@@ -357,7 +361,7 @@ void APC80::setupFeedback()
 		feedback(i.first, i.second.value);
 	}
 }
-void APC80::updateFeedback(vector<string> elements, map<string, int>& values)
+void APC80::updateFeedback(vector<string>& elements, map<string, int>& values)
 {
 	for (auto const& i : elements)
 	{

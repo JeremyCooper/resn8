@@ -7,12 +7,13 @@ public:
 	//Mappable functions//
 	int test(int, vector<int>);
 	int bpmSlot(int, vector<int>);
+	int bpmTap(int, vector<int>);
 	//(stage, param)
 	int smartBind(int, vector<int>);
 	int exStack(int, vector<int>);
 	int ignoreMidi(int, vector<int>);
 	int resetLayer(int, vector<int>);
-	//(target group, new page, direction?)
+	//{target group, new page, direction?}
 	int changeGroupPage(int, vector<int>);
 	int changeLayer(int, vector<int>);
 	int changeBackgroundLayer(int, vector<int>);
@@ -40,7 +41,7 @@ public:
 	int send(string, int);
 	void addOperation(Ptr, vector<int>);
 	void updateFeedback(vector<string>&, string);
-	void updateFeedback(vector<string>, map<string, int>&);
+	void updateFeedback(vector<string>&, map<string, int>&);
 	void setupStates();
 	void setupGroups();
 	void setupPageDisplayValues();
