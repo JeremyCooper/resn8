@@ -1,4 +1,6 @@
 //apc80.h
+#include "../Models/testmodel.cpp"
+#include "../Models/feedbackClass.cpp"
 using namespace std;
 class APC80
 {
@@ -60,7 +62,6 @@ private:
 	vector<bool> active_binds;
 	vector<int> anim_threads;
 	map<string, Ptr> hooks;
-	map<string, Reference> dict;
 	vector<pair<Ptr, vector<int>>> operation_stack;
 	vector<tuple<Ptr, vector<int>, int>> smart_binds;
 	vector<vector<tuple<Ptr, vector<int>, int>>> execution_stacks;

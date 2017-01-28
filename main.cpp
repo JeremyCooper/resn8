@@ -16,7 +16,8 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-//#define d_midi
+#define d_route
+#define dmx_out
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -24,13 +25,35 @@
 #include <map>
 using namespace std;
 #include "RtMidi.h"
+#ifdef dmx_out
+#include <ola/DmxBuffer.h>
+#include <ola/client/StreamingClient.h>
+#endif
 struct Reference
 {
 	Reference() {}
+	Reference(int channel, int note) :
+		channel(channel), note(note) { value = 0; }
 	Reference(int channel, int note, int value) :
 		channel(channel), note(note), value(value) {}
 	int channel, note, value;
 };
+#ifdef dmx_out
+class SendDmx
+{
+public:
+	SendDmx(ola::client::StreamingClient * ola_client)
+		: ola_client(ola_client) { buffer.Blackout(); ola_client->Setup(); }
+	void send(Reference _ref, int value)
+	{
+		buffer.SetChannel(_ref.note, value);
+		ola_client->SendDmx(_ref.channel, buffer);
+	}
+private:
+	ola::client::StreamingClient * ola_client;
+	ola::DmxBuffer buffer;
+};
+#endif
 class SendMidi
 {
 public:
@@ -44,23 +67,20 @@ public:
 		out_message.push_back(value);
 		for (unsigned int i=0; i!=out_message.size(); ++i)
 			out_message[i] += 0;
-#ifndef d_route
 		midiout->sendMessage( &out_message );
-#endif
 		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
 	}
 private:
 	RtMidiOut * midiout;
 };
-#include "Models/testmodel.cpp"
-#include "Models/feedbackClass.cpp"
 int midiBehavior;
 vector<pair<int,int>> currentGroupPage(10); //current page, last page
 map<pair<int, int>, int> groups;
-#include "Controllers/apc80.cpp"
+//#include "Controllers/apc80.cpp"
+#include "Controllers/drumController.cpp"
 //:::::::::::::::::::::::::::
-typedef APC80 Controller;
-//typedef JAMESCONTROLLERCLASS Controller;
+//typedef APC80 Controller;
+typedef Controller Controller;
 //:::::::::::::::::::::::::::
 #include "mapping.cpp"
 
@@ -68,8 +88,11 @@ int channel, note, opGroup, page, value;
 
 RtMidiIn *midiin = new RtMidiIn();
 RtMidiOut *midiout = new RtMidiOut();
+ola::client::StreamingClient ola_client(
+	(ola::client::StreamingClient::Options()));
+SendDmx senddmx {&ola_client};
 SendMidi sendmidi {midiout};
-Controller controller {&sendmidi};
+Controller controller {&senddmx}; //&sendmidi};
 midimap mapping = parse_mapping(&controller);
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
@@ -94,7 +117,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	{
 		(controller.*op.ptr)(value, op.params);
 		//cout << "Return code: " << returnVal << endl;
-	} else if (midiBehavior == 2) {
+	}/* else if (midiBehavior == 2) {
 		vector<string> invalids = {
 			"ascending", "descending", "blink"
 		};
@@ -130,7 +153,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	} else if (midiBehavior == 4) {
 		if (op.name == "smartBindSlot")
 			controller.smartBind(value, vector<int> { 4, op.params[0]});
-	}
+	}*/
 	//cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
@@ -139,13 +162,12 @@ int main()
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
-		{ 3, 0 },
-		{ 3, 1 },
-		{ 3, 2 },
-		{ 3, 3 },
-		{ 3, 4 },
-		{ 3, 0 },
-		{ 3, 0 }
+		{ 0, 0 },
+		{ 0, 1 },
+		{ 0, 2 },
+		{ 1, 0 },
+		{ 1, 1 },
+		{ 1, 2 }
 	};
 	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
@@ -153,7 +175,7 @@ int main()
 		tnote = sends[i].second;
 		opGroup = groups[{tchan, tnote}];
 		tpage = currentGroupPage[opGroup].first;
-		tvalue = 0;
+		tvalue = 255;
 		//ControllerPointer
 		auto op = mapping[tpage][tchan][tnote];
 	
@@ -161,7 +183,7 @@ int main()
 		{
 			(controller.*op.ptr)(tvalue, op.params);
 			//cout << "Return code: " << returnVal << endl;
-		} else if (midiBehavior == 2) {
+		} /*else if (midiBehavior == 2) {
 			vector<string> invalids = {
 				"ascending", "descending", "blink"
 			};
@@ -199,16 +221,23 @@ int main()
 				controller.smartBind(tvalue, vector<int> { 4, op.params[0]});
 			else if (op.name == "exStack")
 				controller.exStack(tvalue, vector<int> { 4, op.params[0]});
-		}
+		} */
 	}
-	cin.get();
+	//cin.get(); //uncomment to keep alive for threads
 	return 0;
 #endif
 
 	//prevent opening a port if correct controller isn't found
+#ifdef d_midi
+	unsigned int nPorts = midiin->getPortCount();
+    for (unsigned int i=0; i<nPorts; i++)
+	{
+		cout << midiin->getPortName(i) << endl;
+	}
+#endif
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
-		if (midiin->getPortName(i) == "APC40 mkII")
+		if (midiin->getPortName(i) == "TriggerIO MIDI Out")//APC40 mkII")
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);
