@@ -1,4 +1,4 @@
-//animationthread.cpp
+//threads.cpp
 #include <thread>
 using namespace std;
 
@@ -41,4 +41,34 @@ private:
 	int thread_id;
 	int * current_thread;
 	vector<int> params;
+};
+
+class BpmThread
+{
+public:
+/*
+   * Execute all binds on phase 0, wait, execute all binds on phase 1, etc.
+
+   * "Bind" object should replace the relatively ad-hoc data-type based
+     storage approach currently being used.
+
+   * When bind is "latched" to the bpmManager, bind object is copied to the
+     bpmManager's internals.
+
+   * "Phase"s will be vector<vector<Bind>>
+*/
+	BpmThread()
+	{
+		currentPhase = 0;
+	}
+	void operator()()
+	{
+		thread t(&BpmThread::run_thread, *this);
+		t.detach();
+	}
+	void run_thread()
+	{
+	}
+private:
+	int currentPhase;
 };

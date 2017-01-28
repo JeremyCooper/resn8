@@ -10,7 +10,8 @@ using namespace std;
 void APC80::fillHooks()
 {
 	hooks["test"] = &APC80::test;
-	hooks["smartBindSlot"] = &APC80::smartBindSlot;
+	hooks["bpmTap"] = &APC80::bpmTap;
+	hooks["bpmSlot"] = &APC80::bpmSlot;
 	hooks["smartBind"] = &APC80::smartBind;
 	hooks["exStack"] = &APC80::exStack;
 	hooks["ignoreMidi"] = &APC80::ignoreMidi;
@@ -24,7 +25,6 @@ void APC80::fillHooks()
 	hooks["red_bg"] = &APC80::red_bg;
 	hooks["green_bg"] = &APC80::green_bg;
 	hooks["blue_bg"] = &APC80::blue_bg;
-	//select layer, opacity, speed, playback controls, select clip, preview clip
 	hooks["selectLayer"] = &APC80::selectLayer;
 	hooks["selectLayer_bg"] = &APC80::selectLayer_bg;
 	hooks["opacity"] = &APC80::opacity;
@@ -40,96 +40,85 @@ void APC80::fillHooks()
 	hooks["changeCurrentSCP"] = &APC80::changeCurrentSCP; // SCP = Saved Clip Page
 }
 //modular with a purpose
+
 //////////////////////////////////////////
-//SMART BIND NOTES AND EXPECTED USE CASES
-// "midiBehavior" functionality
+//BINDER NOTES:///////////////////////////
 /*
-   * Animation is selected by midi button. While midi button is held,
-	 operations are added to a vector until button is released. After
-	 button is released, a save slot is chosen by pressing a midi
-	 button. If no save slot is selected within a certain time, the
-	 saved data is discarded and operation continues as normal.
-	 Quick bind animations as well as bind multiple animations to 
-	 multiple operations to be executed with the same midi button.
-	 //Animations:
+   * Animations:
 	 Ascending, Descending, Strobe
 	 Animations are handled by thread-manager. Old instance is killed
 	 as soon as new instance begins. Full overwrite, no layering.
-
-   * Execution queue mode is entered by pressing a midi button.
-     To add an event to the execution stack, a value is selected
-	 by pressing a midi button, then the operation is selected by
-	 pressing a midi button. Execution stack is saved when mode is
-	 exited and can be invoked by pressing a midi button, causing all
-	 saved executions to be triggered at once.
 
    * Saved animations and execution stacks can be called by bpm-manager
      functionality. Press bpm-manager, press on-beat, press animation or
 	 execution stack, press empty on-beat slot. newly added element will
 	 be triggered at next call of that bpm-manager bank.
 
+  ** exStacks that contain smartBinds or bpmSlots that contain exStacks
+     or smartBinds should copy the behavior so that the original origin
+	 bind is free to be re-assigned.
 
-	 "What are some controls that will NOT be needed during animation and
-	 execution stack creation?"
-	 We can use these buttons as UI for the creation step.
- */
+   * What are some controls that will NOT be needed during animation and
+	 execution stack creation? these can be used as UI buttons for the
+	 creation step.
+*/
+
 //////////////////////////////////////////
-//Misc notes//////////////////////////////
+//MISC NOTES//////////////////////////////
 /*
    * Function that parses midi notes not used in model. For use with
      mapping straight through to preserve some plasticity
- */
+*/
 int APC80::test(int value, vector<int> args)
 {
 	return 0;
 }
-int APC80::smartBindSlot(int value, vector<int> args)
+int APC80::bpmTap(int value, vector<int> args)
 {
-	if (active_binds[args[0]] == false)
-		return 50;
-	tuple<Ptr, vector<int>, int> boundOp = smart_binds[args[0]];
-	Ptr boundPtr = get<0>(boundOp);
-
-	vector<int> params = get<1>(boundOp);
-
-	pair<int, vector<int>> m = animation(
-		get<2>(boundOp), states["mpb"], 1);
-
-	AnimationThread<int (APC80::*)(int, vector<int>), APC80 *>
-			thread_anim(boundPtr, this, m, &anim_threads[args[0]], params);
-
-	//get<1>(boundOp)?????
-	thread_anim();
+	return 0;
+}
+int APC80::bpmSlot(int value, vector<int> args)
+{
 	return 0;
 }
 int APC80::smartBind(int value, vector<int> args)
 {
-	int stage = args[0];
+	int stage = args[2];
 	if (stage == 1) //smart bind mode activated
 	{
-		cout << "stage 1" << endl;
-		bindMode = "smartBind";
-		midiBehavior = 2;
+		if (active_binds[args[1]] == true)
+		{
+			cout << "activating smart bind" << endl;
+			tuple<Ptr, vector<int>, int> boundOp = smart_binds[args[1]];
+			Ptr boundPtr = get<0>(boundOp);
+
+			vector<int> params = get<1>(boundOp);
+			
+			pair<int, vector<int>> m = animation(
+				get<2>(boundOp), states["mpb"], 1); //return animation for "1" bar
+
+			AnimationThread<int (APC80::*)(int, vector<int>), APC80 *>
+				thread_anim(boundPtr, this, m, &anim_threads[args[1]], params);
+
+			thread_anim();
+			return 0;
+		} else {
+			cout << "stage 1" << endl;
+			bindMode = "smartBind";
+			states["smartBindSlot"] = args[1];
+			midiBehavior = 2;
+		}
 	} else if (stage == 2) {
 		cout << "stage 2" << endl;
 		midiBehavior = 3;
 		//changeGroup
 	} else if (stage == 3) {
 		cout << "stage 3" << endl;
-		states["smartBindAnim"] = args[1];
-		midiBehavior = 4;
-	} else if (stage == 4) {
-		cout << "stage 4" << endl;
-		smart_binds[args[1]] = {
-			operation_stack[0].first, operation_stack[0].second, states["smartBindAnim"] }; 
-		active_binds[args[1]] = true;
+		smart_binds[states["smartBindSlot"]] = {
+			operation_stack[0].first, operation_stack[0].second, args[1] };
+		active_binds[states["smartBindSlot"]] = true;
 		operation_stack.clear();
-		states["smartBindAnim"] = 0;
-		midiBehavior = 1;
-	} else if (stage == 0) {
-		cout << "stage 0 (exit prematurely)" << endl;
-		operation_stack.clear();
-		states["smartBindAnim"] = 0;
+		states["smartBindSlot"] = 0;
 		bindMode = "None";
 		midiBehavior = 1;
 	}
@@ -141,7 +130,7 @@ int APC80::exStack(int value, vector<int> args)
 	if (stage == 1)
 	{
 		cout << "stage 1" << endl;
-		if (active_binds[args[1]] == true)
+		if (active_binds[args[1]+5] == true)
 		{
 			cout << "activating execution stack" << endl;
 			vector<tuple<Ptr, vector<int>, int>> boundOpStack = execution_stacks[args[1]];
@@ -166,7 +155,7 @@ int APC80::exStack(int value, vector<int> args)
 		cout << "stage 3" << endl;
 		unsigned int i = operation_stack.size()-1;
 		execution_stacks[states["exStackSlot"]].push_back({operation_stack[i].first, operation_stack[i].second, args[1]});
-		active_binds[states["exStackSlot"]] = true;
+		active_binds[states["exStackSlot"]+5] = true;
 		//go back to grab more commands
 		midiBehavior = 2;
 	} else if (stage == 4) {
@@ -182,12 +171,7 @@ int APC80::exStack(int value, vector<int> args)
 int APC80::changeGroupPage(int value, vector<int> args)
 {
 	int targetGroup = args[0];
-	int currentPage = currentGroupPage[targetGroup].first;
-	int newPage = currentPage;
-	if (args[1] == 0)
-	{
-		int lastPage = currentGroupPage[targetGroup].second;
-		int direction = args[2];
+	int currentPage = currentGroupPage[targetGroup].first; int newPage = currentPage; if (args[1] == 0) { int lastPage = currentGroupPage[targetGroup].second; int direction = args[2];
 		if (direction == -1)
 		{
 			if (currentPage == 0)
@@ -356,6 +340,9 @@ int APC80::previewClip_bg(int value, vector<int> args)
 	return 0;
 }
 //////////////////////////////////////////
+void APC80::bpmManager()
+{
+}
 void APC80::addOperation(Ptr operation, vector<int> args)
 {
 	operation_stack.push_back( { operation, args } );
@@ -374,8 +361,12 @@ void APC80::setupFeedback()
 		feedback(i.first, i.second.value);
 	}
 }
+<<<<<<< HEAD
 //for page switching
 void APC80::updateFeedback(vector<string> elements, map<string, int>& values)
+=======
+void APC80::updateFeedback(vector<string>& elements, map<string, int>& values)
+>>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
 {
 	for (auto const& i : elements)
 	{
