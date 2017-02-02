@@ -14,8 +14,9 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-//#define d_route
+#define d_route
 //#define dmx_out
+//#define output_mapper
 #define binder_on
 //FIXME TODO FIXME TODO FIXME TODO
 
@@ -66,7 +67,7 @@ public:
 		out_message.push_back(value);
 		for (unsigned int i=0; i!=out_message.size(); ++i)
 			out_message[i] += 0;
-		midiout->sendMessage( &out_message );
+		//midiout->sendMessage( &out_message );
 		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
 	}
 private:
@@ -179,6 +180,9 @@ int main()
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
 		{ 0, 0 },
+		{ 0, 1 },
+		{ 0, 2 },
+		{ 0, 3 }
 	};
 	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
@@ -253,7 +257,7 @@ int main()
 #endif
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
-		if (midiin->getPortName(i) == "APC40 mkII") //"TriggerIO MIDI Out")//APC40 mkII")
+		if (midiin->getPortName(i) == "APC40 mkII 20:0") //"TriggerIO MIDI Out")//APC40 mkII")
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);

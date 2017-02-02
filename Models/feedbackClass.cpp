@@ -23,6 +23,7 @@ Feedback::Feedback(SendMidi * sendmidi) : sendmidi(sendmidi)
 int Feedback::operator()(string element, int value)
 {
 	dict[element].value = value;
-	sendmidi->send(dict[element], value);
+	cout << "feedback disabled" << endl;
+	//sendmidi->send(dict[element], value);
 	return 0;
 }

@@ -9,6 +9,30 @@
 using namespace std;
 void APC80::fillHooks()
 {
+	/*
+	   * width
+	   * height
+	   * scale
+	   * rotate X
+	   * rotate Y
+	   * rotate Z
+	   * blend
+	   * preview
+	   * select
+	 */
+
+	hooks["width"] = &APC80::width;
+	hooks["height"] = &APC80::height;
+	hooks["scale"] = &APC80::scale;
+	hooks["rotateX"] = &APC80::rotateX;
+	hooks["rotateY"] = &APC80::rotateY;
+	hooks["rotateZ"] = &APC80::rotateZ;
+	hooks["blend"] = &APC80::blend;
+	hooks["effect"] = &APC80::effect;
+	hooks["previewForward"] = &APC80::previewForward;
+	hooks["previewBackward"] = &APC80::previewBackward;
+	hooks["select"] = &APC80::select;
+
 	hooks["test"] = &APC80::test;
 	hooks["bpmTap"] = &APC80::bpmTap;
 	hooks["bpmSlot"] = &APC80::bpmSlot;
@@ -33,10 +57,6 @@ void APC80::fillHooks()
 	hooks["speed_bg"] = &APC80::speed_bg;
 	hooks["playback"] = &APC80::playback;
 	hooks["playback_bg"] = &APC80::playback_bg;
-	hooks["selectClip"] = &APC80::selectClip;
-	hooks["selectClip_bg"] = &APC80::selectClip_bg;
-	hooks["previewClip"] = &APC80::previewClip;
-	hooks["previewClip_bg"] = &APC80::previewClip_bg;
 	hooks["changeCurrentSCP"] = &APC80::changeCurrentSCP; // SCP = Saved Clip Page
 }
 //modular with a purpose
@@ -72,6 +92,80 @@ void APC80::fillHooks()
 int APC80::test(int value, vector<int> args)
 {
 	return 0;
+}
+int APC80::width(int value, vector<int> args)
+{
+	return send("width", value);
+}
+int APC80::height(int value, vector<int> args)
+{
+	return send("height", value);
+}
+int APC80::scale(int value, vector<int> args)
+{
+	return send("scale", value);
+}
+int APC80::rotateX(int value, vector<int> args)
+{
+	return send("rotateX", value);
+}
+int APC80::rotateY(int value, vector<int> args)
+{
+	return send("rotateY", value);
+}
+int APC80::rotateZ(int value, vector<int> args)
+{
+	return send("rotateZ", value);
+}
+int APC80::blend(int value, vector<int> args)
+{
+	string elementId = "blend_";
+	elementId += to_string(args[0]) + ":";
+	return send(elementId, value);
+}
+int APC80::effect(int value, vector<int> args)
+{
+	string effect = "effect_" + to_string(args[0]);
+	string param = ":param_" + to_string(args[1]);
+	string elementId = effect + param + ":";
+	return send(elementId, value);
+}
+int APC80::previewForward(int value, vector<int> args)
+{
+	string elementId = "preview_";
+	string clipId = "currentClip:" + to_string(states["currentLayer"]);
+	int currentClip = states[clipId];
+	if (currentClip != 12)
+	{
+		elementId += to_string(currentClip+1) + ":";
+		states[clipId] = currentClip+1;
+	} else {
+		elementId += to_string(currentClip) + ":";
+	}
+	return send(elementId, value);
+}
+int APC80::previewBackward(int value, vector<int> args)
+{
+	string elementId = "preview_";
+	string clipId = "currentClip:" + to_string(states["currentLayer"]);
+	int currentClip = states[clipId];
+	if (currentClip != 12)
+	{
+		elementId += to_string(currentClip-1) + ":";
+		states[clipId] = currentClip-1;
+	} else {
+		elementId += to_string(currentClip) + ":";
+	}
+	return send(elementId, value);
+}
+int APC80::select(int value, vector<int> args)
+{
+	string elementId = "select_";
+	string clipId = "currentClip:" + to_string(states["currentLayer"]);
+	int currentClip = states[clipId];
+	elementId += to_string(currentClip) + ":";
+
+	return send(elementId, value);
 }
 int APC80::bpmTap(int value, vector<int> args)
 {
@@ -323,22 +417,6 @@ int APC80::playback_bg(int value, vector<int> args)
 	}
 	return 40;
 }
-int APC80::selectClip(int value, vector<int> args)
-{
-	return 0;
-}
-int APC80::selectClip_bg(int value, vector<int> args)
-{
-	return 0;
-}
-int APC80::previewClip(int value, vector<int> args)
-{
-	return 0;
-}
-int APC80::previewClip_bg(int value, vector<int> args)
-{
-	return 0;
-}
 //////////////////////////////////////////
 void APC80::bpmManager()
 {
@@ -389,6 +467,9 @@ void APC80::updateFeedback(vector<string>& elements, string layer)
 }
 void APC80::setupStates()
 {
+	states["currentClip:0"] = 0;
+	states["currentClip:1"] = 0;
+	states["currentClip:2"] = 0;
 	states["mpb"] = 470;
 	states["smartBindAnim"] = 0;
 	states["currentSCP"] = 0;
@@ -431,9 +512,11 @@ int APC80::send(string element, int value)
 			elementId = element.substr(0, element.length()-3);
 			layer = to_string(states["backgroundLayer"]);
 			model(elementId+layer, value);
+			//TODO: can this just use "element" plain?
 			feedback(elementId+"_bg", value);
 		} else {
 			layer = to_string(states["currentLayer"]);
+			cout << element+layer << endl;
 			model(element+layer, value);
 			feedback(element, value);
 		}
@@ -447,6 +530,15 @@ int APC80::send(string element, int value)
 APC80::APC80(SendMidi * sendmidi) :
 	model {sendmidi}, feedback {sendmidi}
 {
+	//establish output map
+#ifdef output_mapper
+	for (auto const& i : model.dict)
+	{
+		cout << i.first << endl;
+		cin.get();
+		model(i.first, 100);
+	}
+#endif
 	midiBehavior = 1;
 	active_binds.resize(10);//smart_binds and execution stacks
 	anim_threads.resize(10);
