@@ -1,19 +1,6 @@
-<<<<<<< HEAD
-0, 0, 0, drum(0, 0)
-0, 0, 1, drum(0, 1)
-0, 0, 2, drum(0, 2)
-0, 0, 3, drum(0, 3)
-0, 0, 4, drum(0, 4)
-//
-0, 1, 0, drum(1, 0)
-0, 1, 1, drum(1, 1)
-0, 1, 2, drum(1, 2)
-0, 1, 3, drum(1, 3)
-0, 1, 4, drum(1, 4)
-=======
-0, 0, 2, smartBind(1, 0)
+0, 0, 0, smartBind(1, 0)
 0, 0, 1, red()
-0, 0, 3, descending()
+0, 0, 2, descending()
 0, 144, 0, selectLayer(0)
 0, 144, 1, selectLayer(1)
 0, 144, 2, selectLayer(2)
@@ -29,8 +16,6 @@
 0, 144, 15, max()
 0, 144, 21, ascending()
 0, 144, 22, descending()
-
-//0, 0, 2, smartBind(1, 1)
 //0, 144, 4, playback(0)
 //0, 144, 5, playback(1)
 //0, 144, 6, playback(2)
@@ -62,4 +47,3 @@
 //vector<int> currentGroupPage;
 //opGroup = groups[{channel, note}];
 //page = currentGroupPage[opGroup];
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd

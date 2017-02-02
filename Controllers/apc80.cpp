@@ -361,12 +361,9 @@ void APC80::setupFeedback()
 		feedback(i.first, i.second.value);
 	}
 }
-<<<<<<< HEAD
 //for page switching
-void APC80::updateFeedback(vector<string> elements, map<string, int>& values)
-=======
+//void APC80::updateFeedback(vector<string> elements, map<string, int>& values)
 void APC80::updateFeedback(vector<string>& elements, map<string, int>& values)
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
 {
 	for (auto const& i : elements)
 	{

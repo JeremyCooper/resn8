@@ -14,11 +14,9 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-#define d_route
-<<<<<<< HEAD
-#define dmx_out
-=======
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
+//#define d_route
+//#define dmx_out
+#define binder_on
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -77,11 +75,11 @@ private:
 int midiBehavior;
 vector<pair<int,int>> currentGroupPage(10); //current page, last page
 map<pair<int, int>, int> groups;
-//#include "Controllers/apc80.cpp"
-#include "Controllers/drumController.cpp"
+#include "Controllers/apc80.cpp"
+//#include "Controllers/drumController.cpp"
 //:::::::::::::::::::::::::::
-//typedef APC80 Controller;
-typedef Controller Controller;
+typedef APC80 Controller;
+//typedef Controller Controller;
 //:::::::::::::::::::::::::::
 #include "mapping.cpp"
 
@@ -89,11 +87,17 @@ int channel, note, opGroup, page, value;
 
 RtMidiIn *midiin = new RtMidiIn();
 RtMidiOut *midiout = new RtMidiOut();
+#ifdef dmx_out
 ola::client::StreamingClient ola_client(
 	(ola::client::StreamingClient::Options()));
 SendDmx senddmx {&ola_client};
+#endif
 SendMidi sendmidi {midiout};
+#ifdef dmx_out
 Controller controller {&senddmx}; //&sendmidi};
+#else
+Controller controller {&sendmidi};
+#endif
 midimap mapping = parse_mapping(&controller);
 
 void route(double deltatime, vector<unsigned char> * message, void * userData)
@@ -116,16 +120,15 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 		return;
 	if (midiBehavior == 1)
 	{
-<<<<<<< HEAD
 		(controller.*op.ptr)(value, op.params);
 		//cout << "Return code: " << returnVal << endl;
-	}/* else if (midiBehavior == 2) {
-=======
+	}
+#ifdef binder_on
+	  else if (midiBehavior == 2) {
 		int returnValue = (controller.*op.ptr)(value, op.params);
 		if (returnValue != 0) { cout << "Error: " << returnValue << endl; return; }
 	} else if (midiBehavior == 2) {
 		//grab control element
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
 		vector<string> invalids = {
 			"ascending", "descending", "blink",
 			"min", "mid", "max"
@@ -165,12 +168,9 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	} else if (midiBehavior == 4) {
 		if (op.name == "smartBindSlot")
 			controller.smartBind(value, vector<int> { 4, op.params[0]});
-<<<<<<< HEAD
-	}*/
-	//cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
-=======
 	}
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
+#endif
+	//cout << "Return code: " << (controller.*op.ptr)(value, op.params) << endl;
 }
 
 int main()
@@ -178,19 +178,7 @@ int main()
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
-<<<<<<< HEAD
 		{ 0, 0 },
-		{ 0, 1 },
-		{ 0, 2 },
-		{ 1, 0 },
-		{ 1, 1 },
-		{ 1, 2 }
-=======
-		{ 0, 1 },
-		{ 0, 2 },
-		{ 0, 3 },
-		{ 0, 1 }
->>>>>>> 9f8166638c65b4fd06a19d97b429fed1e635fefd
 	};
 	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
@@ -198,7 +186,7 @@ int main()
 		tnote = sends[i].second;
 		opGroup = groups[{tchan, tnote}];
 		tpage = currentGroupPage[opGroup].first;
-		tvalue = 255;
+		tvalue = 0;
 		//ControllerPointer
 		auto op = mapping[tpage][tchan][tnote];
 	
@@ -207,7 +195,9 @@ int main()
 			int returnValue = (controller.*op.ptr)(tvalue, op.params);
 			if (returnValue != 0) { return returnValue; }
 			//cout << "Return code: " << returnVal << endl;
-		} /*else if (midiBehavior == 2) {
+		}
+#ifdef binder_on
+		  else if (midiBehavior == 2) {
 			vector<string> invalids = {
 				"ascending", "descending", "blink",
 				"min", "mid", "max"
@@ -246,7 +236,8 @@ int main()
 				controller.smartBind(tvalue, vector<int> { 4, op.params[0]});
 			else if (op.name == "exStack")
 				controller.exStack(tvalue, vector<int> { 4, op.params[0]});
-		} */
+		}
+#endif
 	}
 	//cin.get(); //uncomment to keep alive for threads
 	return 0;
@@ -262,7 +253,7 @@ int main()
 #endif
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
-		if (midiin->getPortName(i) == "TriggerIO MIDI Out")//APC40 mkII")
+		if (midiin->getPortName(i) == "APC40 mkII") //"TriggerIO MIDI Out")//APC40 mkII")
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);

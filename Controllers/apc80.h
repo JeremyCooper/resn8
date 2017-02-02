@@ -39,6 +39,7 @@ public:
 	int previewClip(int, vector<int>);
 	int previewClip_bg(int, vector<int>);
 	//////////////////////
+	void bpmManager();
 	typedef int (APC80::*Ptr) (int, vector<int>);
 	int send(string, int);
 	void addOperation(Ptr, vector<int>);
