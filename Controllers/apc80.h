@@ -29,6 +29,7 @@ public:
 	int blend(int, vector<int>);
 	int effect(int, vector<int>);
 	/* absolute */
+	int reset(int, vector<int>);
 	int previewForward(int, vector<int>);
 	int previewBackward(int, vector<int>);
 	int select(int, vector<int>);
@@ -49,6 +50,7 @@ public:
 	int selectLayer(int, vector<int>);
 	int selectLayer_bg(int, vector<int>);
 	//////////////////////
+	void output_map();
 	void bpmManager();
 	typedef int (APC80::*Ptr) (int, vector<int>);
 	int send(string, int);

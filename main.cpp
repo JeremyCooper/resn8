@@ -14,7 +14,7 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-#define d_route
+//#define d_midi
 //#define dmx_out
 //#define output_mapper
 #define binder_on
@@ -67,7 +67,7 @@ public:
 		out_message.push_back(value);
 		for (unsigned int i=0; i!=out_message.size(); ++i)
 			out_message[i] += 0;
-		//midiout->sendMessage( &out_message );
+		midiout->sendMessage( &out_message );
 		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
 	}
 private:
@@ -125,10 +125,10 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 		//cout << "Return code: " << returnVal << endl;
 	}
 #ifdef binder_on
-	  else if (midiBehavior == 2) {
+	  /*else if (midiBehavior == 2) {
 		int returnValue = (controller.*op.ptr)(value, op.params);
-		if (returnValue != 0) { cout << "Error: " << returnValue << endl; return; }
-	} else if (midiBehavior == 2) {
+		if (returnValue != 0) { cout << "Error: " << returnValue << endl; return; }*/
+	 else if (midiBehavior == 2) {
 		//grab control element
 		vector<string> invalids = {
 			"ascending", "descending", "blink",
@@ -257,7 +257,7 @@ int main()
 #endif
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
-		if (midiin->getPortName(i) == "APC40 mkII 20:0") //"TriggerIO MIDI Out")//APC40 mkII")
+		if (midiin->getPortName(i) == "APC40 mkII") //"TriggerIO MIDI Out")//APC40 mkII")
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);
@@ -271,6 +271,10 @@ int main()
 		}
 	}
 	midiout->openVirtualPort("resn8");
+
+#ifdef output_mapper
+	controller.output_map();
+#endif
 
 	//CLI options will go here
 

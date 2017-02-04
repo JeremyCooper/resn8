@@ -33,6 +33,7 @@ void APC80::fillHooks()
 	hooks["previewBackward"] = &APC80::previewBackward;
 	hooks["select"] = &APC80::select;
 
+	hooks["reset"] = &APC80::reset;
 	hooks["test"] = &APC80::test;
 	hooks["bpmTap"] = &APC80::bpmTap;
 	hooks["bpmSlot"] = &APC80::bpmSlot;
@@ -177,7 +178,7 @@ int APC80::bpmSlot(int value, vector<int> args)
 }
 int APC80::smartBind(int value, vector<int> args)
 {
-	int stage = args[2];
+	int stage = args[0];
 	if (stage == 1) //smart bind mode activated
 	{
 		if (active_binds[args[1]] == true)
@@ -214,6 +215,12 @@ int APC80::smartBind(int value, vector<int> args)
 		operation_stack.clear();
 		states["smartBindSlot"] = 0;
 		bindMode = "None";
+		midiBehavior = 1;
+	} else if (stage == 0) {
+		active_binds[args[1]] = false;
+		states["smartBindSlot"] = 0;
+		bindMode = "None";
+		smart_binds[args[1]] = {};
 		midiBehavior = 1;
 	}
 	return 0;
@@ -259,13 +266,22 @@ int APC80::exStack(int value, vector<int> args)
 		states["exStackSlot"] = 0;
 		midiBehavior = 1;
 	} else if (stage == 0) {
+		active_binds[args[1]+5] = false;
+		states["exStackSlot"] = 0;
+		bindMode = "None";
+		execution_stacks[args[1]].clear();
+		midiBehavior = 1;
 	}
 	return 0;
 }
 int APC80::changeGroupPage(int value, vector<int> args)
 {
 	int targetGroup = args[0];
-	int currentPage = currentGroupPage[targetGroup].first; int newPage = currentPage; if (args[1] == 0) { int lastPage = currentGroupPage[targetGroup].second; int direction = args[2];
+	int currentPage = currentGroupPage[targetGroup].first;
+	int newPage = currentPage;
+	if (args.size() == 3) {
+		int lastPage = currentGroupPage[targetGroup].second;
+		int direction = args[2];
 		if (direction == -1)
 		{
 			if (currentPage == 0)
@@ -274,8 +290,7 @@ int APC80::changeGroupPage(int value, vector<int> args)
 			} else {
 				newPage = currentPage-1;
 			}
-		} else if (direction == 1)
-		{
+		} else if (direction == 1) {
 			if (currentPage == lastPage)
 			{
 				newPage = 0;
@@ -417,6 +432,10 @@ int APC80::playback_bg(int value, vector<int> args)
 	}
 	return 40;
 }
+int APC80::reset(int value, vector<int> args)
+{
+	setupFeedback();
+}
 //////////////////////////////////////////
 void APC80::bpmManager()
 {
@@ -474,8 +493,8 @@ void APC80::setupStates()
 	states["smartBindAnim"] = 0;
 	states["currentSCP"] = 0;
 	states["numberSCP"] = 3;
-	states["currentLayer"] = 0;
-	states["backgroundLayer"] = 1;
+	states["currentLayer"] = 1;
+	states["backgroundLayer"] = 0;
 }
 void APC80::setupGroups()
 {
@@ -527,18 +546,19 @@ int APC80::send(string element, int value)
 	}
 	return 0;
 }
-APC80::APC80(SendMidi * sendmidi) :
-	model {sendmidi}, feedback {sendmidi}
+void APC80::output_map()
 {
 	//establish output map
-#ifdef output_mapper
 	for (auto const& i : model.dict)
 	{
 		cout << i.first << endl;
 		cin.get();
 		model(i.first, 100);
 	}
-#endif
+}
+APC80::APC80(SendMidi * sendmidi) :
+	model {sendmidi}, feedback {sendmidi}
+{
 	midiBehavior = 1;
 	active_binds.resize(10);//smart_binds and execution stacks
 	anim_threads.resize(10);
