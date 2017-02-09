@@ -15,9 +15,9 @@
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
 //#define d_midi
-//#define dmx_out
+#define dmx_out
 //#define output_mapper
-#define binder_on
+//#define binder_on
 //FIXME TODO FIXME TODO FIXME TODO
 
 #include <iostream>
@@ -76,11 +76,11 @@ private:
 int midiBehavior;
 vector<pair<int,int>> currentGroupPage(10); //current page, last page
 map<pair<int, int>, int> groups;
-#include "Controllers/apc80.cpp"
-//#include "Controllers/drumController.cpp"
+//#include "Controllers/apc80.cpp"
+#include "Controllers/drumController.cpp"
 //:::::::::::::::::::::::::::
-typedef APC80 Controller;
-//typedef Controller Controller;
+//typedef APC80 Controller;
+typedef Controller Controller;
 //:::::::::::::::::::::::::::
 #include "mapping.cpp"
 
@@ -95,7 +95,7 @@ SendDmx senddmx {&ola_client};
 #endif
 SendMidi sendmidi {midiout};
 #ifdef dmx_out
-Controller controller {&senddmx}; //&sendmidi};
+Controller controller {&sendmidi, &senddmx}; //&sendmidi};
 #else
 Controller controller {&sendmidi};
 #endif

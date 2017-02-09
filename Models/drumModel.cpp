@@ -3,13 +3,16 @@ using namespace std;
 class Drums
 {
 public:
-	Drums(SendDmx *);
-	//Drums(SendDMX *);
+	Drums(SendMidi *);
+	Drums(SendMidi *, SendDmx *);
 	void setupDictionary();
 	int operator()(string, int);
 	map<string, Reference> dict;
 private:
+	SendMidi * sendmidi;
+#ifdef dmx_out
 	SendDmx * senddmx;
+#endif
 };
 /////////////////////
 void Drums::setupDictionary()
@@ -38,7 +41,11 @@ void Drums::setupDictionary()
 	dict["kit_1:drum_2:G"] = { 1, 16 };
 	dict["kit_1:drum_2:B"] = { 1, 17 };
 }
-Drums::Drums(SendDmx * senddmx) : senddmx(senddmx) //SendMidi * sendmidi) : sendmidi(sendmidi)
+Drums::Drums(SendMidi * sendmidi, SendDmx * senddmx) : sendmidi(sendmidi), senddmx(senddmx)
+{
+	setupDictionary();
+}
+Drums::Drums(SendMidi * sendmidi) : sendmidi(sendmidi)
 {
 	setupDictionary();
 }

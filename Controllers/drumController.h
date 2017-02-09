@@ -5,7 +5,8 @@ class Controller
 public:
 	int drum(int, vector<int>);
 ///////////////////////////
-	Controller(SendDmx *);
+	Controller(SendMidi *);
+	Controller(SendMidi *, SendDmx *);
 
 	typedef int (Controller::*Ptr) (int, vector<int>);
 

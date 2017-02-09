@@ -35,8 +35,16 @@ void Controller::setupStates()
 	states["A"] = 0; //?
 	states["W"] = 0; //?
 }
-Controller::Controller (SendDmx * senddmx) ://SendMidi * sendmidi) :
-	model {senddmx}
+Controller::Controller (SendMidi * sendmidi) :
+	model {sendmidi}
+{
+	midiBehavior = 1;
+	setupHooks();
+	setupStates();
+	//setupFeedback();
+}
+Controller::Controller (SendMidi * sendmidi, SendDmx * senddmx) :
+	model {sendmidi, senddmx}
 {
 	midiBehavior = 1;
 	setupHooks();
