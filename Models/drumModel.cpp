@@ -4,7 +4,9 @@ class Drums
 {
 public:
 	Drums(SendMidi *);
+#ifdef dmx_out
 	Drums(SendMidi *, SendDmx *);
+#endif
 	void setupDictionary();
 	int operator()(string, int);
 	map<string, Reference> dict;
@@ -41,21 +43,22 @@ void Drums::setupDictionary()
 	dict["kit_1:drum_2:G"] = { 1, 16 };
 	dict["kit_1:drum_2:B"] = { 1, 17 };
 }
-Drums::Drums(SendMidi * sendmidi, SendDmx * senddmx) : sendmidi(sendmidi), senddmx(senddmx)
-{
-	setupDictionary();
-}
 Drums::Drums(SendMidi * sendmidi) : sendmidi(sendmidi)
 {
 	setupDictionary();
 }
+#ifdef dmx_out
+Drums::Drums(SendMidi * sendmidi, SendDmx * senddmx) : sendmidi(sendmidi), senddmx(senddmx)
+{
+	setupDictionary();
+}
+#endif
 int Drums::operator()(string element, int value)
 {
 	dict[element].value = value;
-
-	cout << "drumModel sending: " << dict[element].channel
-		<< ", " << dict[element].note << ", " << value << endl;
-
+#ifdef dmx_out
 	senddmx->send(dict[element], value);
+#endif
+	sendmidi->send(dict[element], value);
 	return 0;
 }

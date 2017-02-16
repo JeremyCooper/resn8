@@ -11,8 +11,8 @@ int Controller::drum(int value, vector<int> args)
 	string drum_identifier = kit + ":" + drum;
 	if (states["mode"] == 0) {
 		model(drum_identifier + ":R", int(states["R"] * (value/127.0)));
-		model(drum_identifier + ":G", int(states["G"] * (value/127.0)));
-		model(drum_identifier + ":B", int(states["B"] * (value/127.0)));
+		//model(drum_identifier + ":G", int(states["G"] * (value/127.0)));
+		//model(drum_identifier + ":B", int(states["B"] * (value/127.0)));
 	} else if (states["mode"] == 1) {
 	} else if (states["mode"] == 2) {
 	} else if (states["mode"] == 3) {
@@ -20,8 +20,8 @@ int Controller::drum(int value, vector<int> args)
 	} else if (states["mode"] == 5) {
 	} else if (states["mode"] == 6) {
 	}
-	drumOff(lastDrum);
-	lastDrum = drum_identifier;
+	//drumOff(lastDrum);
+	//lastDrum = drum_identifier;
 	return 0;
 }
 int Controller::mode(int value, vector<int> args)
@@ -58,11 +58,11 @@ void Controller::setupFeedback()
 void Controller::setupStates()
 {
 	states["mode"] = 0;
-	states["R"] = 255;
-	states["G"] = 0;
-	states["B"] = 0;
-	states["A"] = 0; //?
-	states["W"] = 0; //?
+	states["R"] = 127;
+	states["G"] = 127;
+	states["B"] = 127;
+	states["A"] = 127; //?
+	states["W"] = 127; //?
 }
 Controller::Controller (SendMidi * sendmidi) :
 	model {sendmidi}
@@ -73,6 +73,7 @@ Controller::Controller (SendMidi * sendmidi) :
 	//setupFeedback();
 	lastDrum = "";
 }
+#ifdef dmx_out
 Controller::Controller (SendMidi * sendmidi, SendDmx * senddmx) :
 	model {sendmidi, senddmx}//, resolume {sendmidi}
 {
@@ -80,7 +81,9 @@ Controller::Controller (SendMidi * sendmidi, SendDmx * senddmx) :
 	setupHooks();
 	setupStates();
 	//setupFeedback();
+	lastDrum = "";
 }
+#endif
 Controller::Ptr Controller::returnPointer(string operation_name)
 {
 	auto index = hooks.find(operation_name);

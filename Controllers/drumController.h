@@ -8,7 +8,9 @@ public:
 	int drum(int, vector<int>);
 ///////////////////////////
 	Controller(SendMidi *);
+#ifdef dmx_out
 	Controller(SendMidi *, SendDmx *);
+#endif
 
 	typedef int (Controller::*Ptr) (int, vector<int>);
 

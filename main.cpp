@@ -14,9 +14,9 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-#define d_midi
+//#define d_midi
 //#define d_route
-#define dmx_out
+//#define dmx_out
 //#define output_mapper
 //#define binder_on
 //FIXME TODO FIXME TODO FIXME TODO
@@ -24,14 +24,15 @@
 #include <iostream>
 #include <vector>
 #include <map>
-using namespace std;
 #include "RtMidi.h"
 #ifdef dmx_out
 #include <ola/DmxBuffer.h>
 #include <ola/client/StreamingClient.h>
 #endif
+using namespace std;
 
 string midiInName = "RtMidi Output Client 131:0";
+string midiOutName = "CH345 20:0";
 
 struct Reference
 {
@@ -40,7 +41,7 @@ struct Reference
 		channel(channel), note(note) { value = 0; }
 	Reference(int channel, int note, int value) :
 		channel(channel), note(note), value(value) {}
-	int channel, note, value;
+	unsigned char channel, note, value;
 };
 #ifdef dmx_out
 class SendDmx
@@ -64,15 +65,15 @@ public:
 	SendMidi(RtMidiOut * midiout) : midiout(midiout) {}
 	void send(Reference _ref, int value)
 	{
-		//cout << _ref.channel << ", " << _ref.note << ", " << value << endl;
 		vector<unsigned char> out_message;
 		out_message.push_back(_ref.channel);
 		out_message.push_back(_ref.note);
 		out_message.push_back(value);
 		for (unsigned int i=0; i!=out_message.size(); ++i)
 			out_message[i] += 0;
-		midiout->sendMessage( &out_message );
-		cout << "Sending midi: " << _ref.channel << ", " << _ref.note << ", " << value << endl;
+		cout << "Sending midi: " << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;
+	//	for (int i=0; i<29; i++)
+			midiout->sendMessage( &out_message );
 	}
 private:
 	RtMidiOut * midiout;
@@ -99,7 +100,7 @@ SendDmx senddmx {&ola_client};
 #endif
 SendMidi sendmidi {midiout};
 #ifdef dmx_out
-Controller controller {&sendmidi, &senddmx}; //&sendmidi};
+Controller controller {&sendmidi, &senddmx};
 #else
 Controller controller {&sendmidi};
 #endif
@@ -112,7 +113,7 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 	opGroup = groups[ {channel, note} ];
 	page = currentGroupPage[opGroup].first;
 	value = (int)message->at(2);
-	
+
 #ifdef d_midi
 	unsigned int nBytes = message->size();
 	for (unsigned int i=0; i!=nBytes-1; ++i)
@@ -180,6 +181,11 @@ void route(double deltatime, vector<unsigned char> * message, void * userData)
 
 int main()
 {
+	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
+		if (midiout->getPortName(i) == midiOutName)
+			//cout << "hi" << endl;
+			midiout->openPort(i);
+	//midiout->openVirtualPort("resn8");
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
@@ -252,32 +258,16 @@ int main()
 #endif
 
 	//prevent opening a port if correct controller isn't found
-#ifdef d_midi
-	unsigned int nPorts = midiin->getPortCount();
-    for (unsigned int i=0; i<nPorts; i++)
-	{
-		cout << midiin->getPortName(i) << endl;
-	}
-#endif
+
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
+		cout << midiin->getPortName(i) << endl;
 		if (midiin->getPortName(i) == midiInName)
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);
 		}
 	}
-	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
-	{
-#ifdef d_midi
-		cout << midiout->getPortName(i) << endl;
-#endif
-		if (midiout->getPortName(i) == "resn8")
-		{
-			midiout->openPort(i);
-		}
-	}
-	midiout->openVirtualPort("resn8");
 
 #ifdef output_mapper
 	controller.output_map();
@@ -288,6 +278,8 @@ int main()
 	cout << "\nReading MIDI input .. press <enter> to quit.\n";
 	cin.get();
 
+	delete midiin;
+	delete midiout;
 	return 0;
 }
 
