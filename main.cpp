@@ -14,7 +14,8 @@
 
 //d_midi, d_route, d_parser
 //FIXME TODO FIXME TODO FIXME TODO
-//#define d_midi
+#define d_midi
+//#define d_route
 #define dmx_out
 //#define output_mapper
 //#define binder_on
@@ -29,6 +30,9 @@ using namespace std;
 #include <ola/DmxBuffer.h>
 #include <ola/client/StreamingClient.h>
 #endif
+
+string midiInName = "RtMidi Output Client 131:0";
+
 struct Reference
 {
 	Reference() {}
@@ -181,8 +185,8 @@ int main()
 	vector<pair<int, int>> sends = {
 		{ 0, 0 },
 		{ 0, 1 },
-		{ 0, 2 },
-		{ 0, 3 }
+		{ 1, 0 },
+		{ 1, 1 }
 	};
 	for (unsigned int i=0; i!=sends.size(); ++i)
 	{
@@ -257,7 +261,7 @@ int main()
 #endif
 	for (unsigned int i=0; i!=midiin->getPortCount(); ++i)
 	{
-		if (midiin->getPortName(i) == "APC40 mkII") //"TriggerIO MIDI Out")//APC40 mkII")
+		if (midiin->getPortName(i) == midiInName)
 		{
 			midiin->openPort(i);
 			midiin->setCallback(&route);
@@ -265,6 +269,9 @@ int main()
 	}
 	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
 	{
+#ifdef d_midi
+		cout << midiout->getPortName(i) << endl;
+#endif
 		if (midiout->getPortName(i) == "resn8")
 		{
 			midiout->openPort(i);
