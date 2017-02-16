@@ -31,7 +31,7 @@
 #endif
 using namespace std;
 
-string midiInName = "RtMidi Output Client 131:0";
+string midiInName = "APC40 mkII 20:0";
 string midiOutName = "CH345 20:0";
 
 struct Reference
@@ -72,8 +72,7 @@ public:
 		for (unsigned int i=0; i!=out_message.size(); ++i)
 			out_message[i] += 0;
 		cout << "Sending midi: " << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;
-	//	for (int i=0; i<29; i++)
-			midiout->sendMessage( &out_message );
+		midiout->sendMessage( &out_message );
 	}
 private:
 	RtMidiOut * midiout;
@@ -183,9 +182,9 @@ int main()
 {
 	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
 		if (midiout->getPortName(i) == midiOutName)
-			//cout << "hi" << endl;
-			midiout->openPort(i);
-	//midiout->openVirtualPort("resn8");
+			cout << "hi" << endl;
+	//		midiout->openPort(i);
+	midiout->openVirtualPort("resn8");
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {

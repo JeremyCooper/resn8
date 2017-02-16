@@ -435,6 +435,7 @@ int APC80::playback_bg(int value, vector<int> args)
 int APC80::reset(int value, vector<int> args)
 {
 	setupFeedback();
+	return 0;
 }
 //////////////////////////////////////////
 void APC80::bpmManager()
