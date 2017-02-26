@@ -5,10 +5,10 @@ using namespace std;
 
 #define list_ports
 
-string drumName1 = "APC40 mkII 24:0";
+string drumName1 = "mio";
 string drumName2 = "APC40 mkII 20:0";
 string drumName3 = "QUNEO 28:0";
-int channelGap = 0;
+int channelGap = 10;
 int noteGap = 0;
 int triggerChannel = 0;
 int triggerNoteStart = 0;
@@ -32,7 +32,7 @@ void route_1(double deltatime, vector<unsigned char> * message, void * userData)
 	out_message.push_back((int)message->at(2));
 	/*for (unsigned int i=0; i!=out_message.size(); ++i)
 		out_message[i] += 0;*/
-	//cout << out_message[0] << ", " << out_message[1] << ", " << out_message[2] << endl;
+	cout << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;
 	midiout->sendMessage( &out_message );
 }
 void route_2(double deltatime, vector<unsigned char> * message, void * userData)
@@ -43,6 +43,7 @@ void route_2(double deltatime, vector<unsigned char> * message, void * userData)
 	out_message.push_back((int)message->at(2));
 	for (unsigned int i=0; i!=out_message.size(); ++i)
 		out_message[i] += 0;
+	cout << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;
 	midiout->sendMessage( &out_message );
 }
 void route_3(double deltatime, vector<unsigned char> * message, void * userData)
@@ -68,18 +69,28 @@ int main()
 	for (unsigned int i=0; i!=drumkit1->getPortCount(); ++i)
 		cout << drumkit1->getPortName(i) << endl;
 #endif
-	for (unsigned int i=0; i!=drumkit1->getPortCount(); ++i)
+		drumkit1->openPort(1);
+		drumkit1->setCallback( &route_1 );
+		drumkit2->openPort(2);
+		drumkit2->setCallback( &route_2 );
+	/*for (unsigned int i=0; i!=drumkit1->getPortCount(); ++i)
 		if (drumkit1->getPortName(i) == drumName1)
-			drumkit1->openPort(i);
-	drumkit1->setCallback( &route_1 );
+		{
+			drumkit1->openPort(0);
+			drumkit1->setCallback( &route_1 );
+		}
 	for (unsigned int i=0; i!=drumkit2->getPortCount(); ++i)
 		if (drumkit2->getPortName(i) == drumName2)
-			drumkit2->openPort(i);
-	drumkit2->setCallback( &route_2 );
+		{
+			drumkit2->openPort(1);
+			drumkit2->setCallback( &route_2 );
+		}*/
 	for (unsigned int i=0; i!=drumkit3->getPortCount(); ++i)
 		if (drumkit3->getPortName(i) == drumName3)
+		{
 			drumkit3->openPort(i);
-	drumkit3->setCallback( &route_3 );
+			drumkit3->setCallback( &route_3 );
+		}
 
 	midiout->openVirtualPort("midicompiler");
 	cin.get();

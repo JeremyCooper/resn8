@@ -16,7 +16,7 @@
 //FIXME TODO FIXME TODO FIXME TODO
 //#define d_midi
 //#define d_route
-//#define dmx_out
+#define dmx_out
 //#define output_mapper
 //#define binder_on
 //FIXME TODO FIXME TODO FIXME TODO
@@ -31,8 +31,8 @@
 #endif
 using namespace std;
 
-string midiInName = "APC40 mkII 20:0";
-string midiOutName = "CH345 20:0";
+string midiInName = "midicompiler";
+string midiOutName = "USB2.0-MIDI Port 1";
 
 struct Reference
 {
@@ -73,6 +73,10 @@ public:
 			out_message[i] += 0;
 		cout << "Sending midi: " << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;
 		midiout->sendMessage( &out_message );
+		/*out_message[0] = 128;
+		out_message[2] = 0;
+		midiout->sendMessage( &out_message );
+		cout << "Sending midi: " << int(out_message[0]) << ", " << int(out_message[1]) << ", " << int(out_message[2]) << endl;*/
 	}
 private:
 	RtMidiOut * midiout;
@@ -182,9 +186,8 @@ int main()
 {
 	for (unsigned int i=0; i!=midiout->getPortCount(); ++i)
 		if (midiout->getPortName(i) == midiOutName)
-			cout << "hi" << endl;
-	//		midiout->openPort(i);
-	midiout->openVirtualPort("resn8");
+			midiout->openPort(i);
+	//midiout->openVirtualPort("resn8");
 #ifdef d_route
 	int tpage, tchan, tnote, tvalue;
 	vector<pair<int, int>> sends = {
@@ -263,6 +266,7 @@ int main()
 		cout << midiin->getPortName(i) << endl;
 		if (midiin->getPortName(i) == midiInName)
 		{
+			cout << "found port" << endl;
 			midiin->openPort(i);
 			midiin->setCallback(&route);
 		}

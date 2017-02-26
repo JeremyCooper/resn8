@@ -13,7 +13,23 @@ private:
 ////////////////////////
 void Resolume::setupDictionary()
 {
-	dict["kit_0:drum_0"] = { 1, 0 };
+	dict["kit_0:drum_0"] = { 144, 0 };
+	dict["kit_0:drum_1"] = { 144, 1 };
+	dict["kit_0:drum_2"] = { 144, 2 };
+	dict["kit_0:drum_3"] = { 144, 3 };
+	dict["kit_0:drum_4"] = { 144, 4 };
+	dict["kit_0:drum_5"] = { 144, 5 };
+	dict["kit_0:drum_6"] = { 144, 6 };
+	dict["kit_0:drum_7"] = { 144, 7 };
+
+	dict["kit_1:drum_0"] = { 145, 0 };
+	dict["kit_1:drum_1"] = { 145, 1 };
+	dict["kit_1:drum_2"] = { 145, 2 };
+	dict["kit_1:drum_3"] = { 145, 3 };
+	dict["kit_1:drum_4"] = { 145, 4 };
+	dict["kit_1:drum_5"] = { 145, 5 };
+	dict["kit_1:drum_6"] = { 145, 6 };
+	dict["kit_1:drum_7"] = { 145, 7 };
 }
 Resolume::Resolume(SendMidi * sendmidi) : sendmidi(sendmidi)
 {
@@ -22,8 +38,6 @@ Resolume::Resolume(SendMidi * sendmidi) : sendmidi(sendmidi)
 int Resolume::operator()(string element, int value)
 {
 	dict[element].value = value;
-	cout << "resModel sending: " << dict[element].channel
-		<< ", " << dict[element].note << ", " << value << endl;
-	sendmidi->send(dict[element], value);
+	sendmidi->send(dict[element], 127);
 	return 0;
 }
